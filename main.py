@@ -22,11 +22,11 @@ def update_main_data():
     Aktualizuje hlavní datový soubor na základě dat z jednotlivých webů.
     """
     source_webs = ["remax", "sreality"]  # Přidat další weby podle potřeby
-    main_file = "main_data.csv"
+    main_file = "main_data_raw.csv"
 
     # Inicializovat hlavní datový soubor, pokud neexistuje
     if not os.path.exists(main_file):
-        pd.DataFrame(columns=["ID", "Název nemovitosti", "src_web", "ins_dt", "upd_dt", "del_flag"]).to_csv(main_file, index=False)
+        pd.DataFrame(columns=["ID", "src_web", "ins_dt", "upd_dt", "del_flag"]).to_csv(main_file, index=False)
 
     for source_web in source_webs:
         logger.info(f"Updating main data for source: {source_web}")

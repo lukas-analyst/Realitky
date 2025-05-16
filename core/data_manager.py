@@ -11,85 +11,80 @@ def load_existing_data(file_path):
         return pd.read_csv(file_path)
     except FileNotFoundError:
         # Pokud soubor neexistuje, vrátí prázdný DataFrame
-        return pd.DataFrame(columns=["ID", "Název nemovitosti", "Cena", "GPS souřadnice", "ins_dt", "upd_dt", "del_flag"])
-
-
-def save_to_csv(new_data, file_path):
-    """
-    Aktualizuje nebo přidá nové záznamy do CSV souboru.
-    :param new_data: Nová data (list slovníků).
-    :param file_path: Cesta k CSV souboru.
-    """
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    existing_data = load_existing_data(file_path)
-    updated_data = existing_data.copy()
-
+        return pd.DataFrame(columns=["ID", "Název nemovitosti", "ins_dt", "upd_dt", "del_flag"])
+    
+# Funkce pro porovnání a filtrování záznamů podle hashe (listing_hash)
+def filter_unchanged_records(new_data, main_data):
+    filtered = []
     for record in new_data:
-        # Najít existující záznam podle ID
-        existing_record = updated_data[updated_data["ID"] == record["ID"]]
-
-        if not existing_record.empty:
-            # Pokud se data změnila, označit starý záznam jako zastaralý a přidat nový
-            if not existing_record.iloc[0][["Název nemovitosti", "Cena", "GPS souřadnice"]].equals(
-                pd.Series(record, index=["Název nemovitosti", "Cena", "GPS souřadnice"])
-            ):
-                updated_data.loc[existing_record.index, "del_flag"] = True
-                updated_data.loc[existing_record.index, "upd_dt"] = now
-                record["ins_dt"] = now
-                record["upd_dt"] = now
-                record["del_flag"] = False
-                updated_data = pd.concat([updated_data, pd.DataFrame([record])], ignore_index=True)
-        else:
-            # Pokud záznam neexistuje, přidat nový
-            record["ins_dt"] = now
-            record["upd_dt"] = now
-            record["del_flag"] = False
-            updated_data = pd.concat([updated_data, pd.DataFrame([record])], ignore_index=True)
-
-    # Uložit aktualizovaná data do CSV
-    updated_data.to_csv(file_path, index=False)
+        existing = main_data[(main_data["ID"] == record["ID"]) & (main_data["del_flag"] == False)]
+        if not existing.empty:
+            if record.get("listing_hash") == existing.iloc[0].get("listing_hash"):
+                continue  # Nemovitost se nezměnila, přeskočit
+        filtered.append(record)
+    return filtered
 
 
-
-def upsert_to_main_data(source_web, main_file="main_data.csv", output_dir="./data"):
+def upsert_to_main_data(source_web, main_file="main_data_raw.csv", output_dir="./data"):
     """
     Porovná data z hlavního datového souboru s daty z konkrétního webu a provede upsert.
-    :param source_web: Název zdrojového webu (např. 'remax', 'sreality').
-    :param main_file: Cesta k hlavnímu datovému souboru.
-    :param output_dir: Adresář, kde jsou uložené soubory jednotlivých webů.
+    Porovnává všechny sloupce kromě ins_dt, upd_dt, del_flag.
     """
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    source_file = os.path.join(output_dir, f"{source_web}_listings.csv")
+    current_date = datetime.now().strftime("%Y_%m_%d")
+    source_file = os.path.join(output_dir, f"{source_web}_listings_{current_date}.csv")
 
     # Načíst data z hlavního souboru a zdrojového souboru
     main_data = load_existing_data(main_file)
     source_data = load_existing_data(source_file)
 
-    # Filtrovat hlavní data podle zdrojového webu
-    filtered_main_data = main_data[main_data["src_web"] == source_web]
+    # Filtrace nových/změněných záznamů podle hash
+    filtered_source_data = filter_unchanged_records(source_data.to_dict(orient="records"), main_data)
+
+    # Pokud není co upsertovat, skonči
+    if not filtered_source_data:
+        return
+
+    # Zajistit, že všechny nové sloupce budou v main_data
+    for col in source_data.columns:
+        if col not in main_data.columns:
+            main_data[col] = None
+
+    # Pracujeme pouze s platnými záznamy (del_flag == False)
+    filtered_main_data = main_data[(main_data["src_web"] == source_web) & (main_data["del_flag"] == False)]
     updated_data = main_data.copy()
 
-    for _, record in source_data.iterrows():
-        # Najít existující záznam podle ID
+    ignore_cols = {"ins_dt", "upd_dt", "del_flag"}
+    compare_cols = [col for col in source_data.columns if col not in ignore_cols]
+
+    for record in filtered_source_data:
         existing_record = filtered_main_data[filtered_main_data["ID"] == record["ID"]]
 
+        # Pokud existuje platný záznam, provedeme porovnání a případný upsert
         if not existing_record.empty:
-            # Pokud se data změnila, označit starý záznam jako zastaralý a přidat nový
-            if not existing_record.iloc[0][["Název nemovitosti", "Cena", "GPS souřadnice"]].equals(
-                record[["Název nemovitosti", "Cena", "GPS souřadnice"]]
-            ):
+            is_different = False
+            for col in compare_cols:
+                val_main = existing_record.iloc[0].get(col, None)
+                val_new = record.get(col, None)
+                if pd.isna(val_main) and pd.isna(val_new):
+                    continue
+                if val_main != val_new:
+                    is_different = True
+                    break
+
+            if is_different:
                 updated_data.loc[existing_record.index, "del_flag"] = True
                 updated_data.loc[existing_record.index, "upd_dt"] = now
-                record["ins_dt"] = existing_record.iloc[0]["ins_dt"]
+                # Nový záznam má vždy aktuální ins_dt
+                record["ins_dt"] = now
                 record["upd_dt"] = now
                 record["del_flag"] = False
                 updated_data = pd.concat([updated_data, pd.DataFrame([record])], ignore_index=True)
         else:
-            # Pokud záznam neexistuje, přidat nový
+            # Pokud žádný platný záznam neexistuje (nebo existuje pouze del_flag=True), přidáme nový záznam
             record["ins_dt"] = now
             record["upd_dt"] = now
             record["del_flag"] = False
             updated_data = pd.concat([updated_data, pd.DataFrame([record])], ignore_index=True)
 
-    # Uložit aktualizovaná data do hlavního souboru
     updated_data.to_csv(main_file, index=False)

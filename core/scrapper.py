@@ -32,9 +32,9 @@ async def run_scrapers():
         max_pages = scraper_config["max_pages"]
 
         logger.info(f"Starting scraper for {source_web} in location: {scraper.location}")
-        listings = await scraper.fetch_listings(max_pages=max_pages)
-        logger.info(f"Scrapped {len(listings)} listings from {source_web}")
+        listings_data = await scraper.fetch_listings(max_pages=max_pages)
+        logger.info(f"Scrapped {len(listings_data)} listings from {source_web}")
 
         # Uložit data do souboru specifického pro zdrojový web
-        save_scraped_data(listings, source_web=source_web)
+        save_scraped_data(listings_data, source_web=source_web)
         logger.info(f"Data from {source_web} saved to {source_web}_listings.csv")

@@ -2,6 +2,8 @@ import os
 import httpx
 import logging
 import asyncio
+import hashlib
+import json
 from core.utils import save_html, extract_details
 from selectolax.parser import HTMLParser
 from datetime import datetime
@@ -77,43 +79,44 @@ class RemaxScraper:
         return results
 
     async def fetch_property_details(self, url: str):
-        """
-        Načte detaily nemovitosti z detailní stránky a uloží HTML do souboru.
-        :param url: URL detailní stránky nemovitosti.
-        :return: Slovník s detaily nemovitosti.
-        """
         property_id = url.split("/")[5]
         self.logger.info(f"Fetching details for property ID: {property_id}")
-
+    
         # Načtení HTML stránky
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
             response.raise_for_status()
-
+    
         # Uložení HTML stránky
         save_html(response.text, "./test/remax_test/details", f"{property_id}.html")
-
-        # Parsování HTML
+    
+        # Parsování HTML (musí být před použitím parseru)
         parser = HTMLParser(response.text)
+    
+        # ID nemovitosti
         details = {"ID": property_id, "URL": url}
-
+    
         # Název nemovitosti
         title_element = parser.css_first("h1.h2.pd-header__title")
         details["Název nemovitosti"] = title_element.text(strip=True) if title_element else "N/A"
-
+    
         # Cena a další detaily
         price_container = parser.css_first("div.pd-table__inner")
         if price_container:
             details.update(extract_details(price_container, "div.pd-table__row", "div.pd-table__label", "div.pd-table__value"))
-
+    
         # Další detaily
         detail_container = parser.css_first("div.pd-detail-info")
         if detail_container:
             details.update(extract_details(detail_container, "div.pd-detail-info__row", "div.pd-detail-info__label", "div.pd-detail-info__value"))
-
+    
         # GPS souřadnice
         map_element = parser.css_first("div#listingMap")
         details["GPS souřadnice"] = map_element.attributes.get("data-gps") if map_element else "N/A"
 
+        # Vytvoření hashe po naplnění všech atributů nemovitosti
+        hash_input = {k: v for k, v in details.items() if k not in ["URL", "listing_hash"]}
+        details["listing_hash"] = hashlib.sha256(json.dumps(hash_input, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+    
         self.logger.info(f"Details for property ID {property_id}: {details}")
         return details
