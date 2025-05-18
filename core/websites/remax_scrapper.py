@@ -99,6 +99,10 @@ class RemaxScraper:
         # Název nemovitosti
         title_element = parser.css_first("h1.h2.pd-header__title")
         details["Název nemovitosti"] = title_element.text(strip=True) if title_element else "N/A"
+
+        # Popis nemovitosti
+        description_container = parser.css_first("div.pd-base-info__content-collapse-inner")
+        details["Popis nemovitosti"] = description_container.text(strip=True) if description_container else "N/A"
     
         # Cena a další detaily
         price_container = parser.css_first("div.pd-table__inner")
@@ -113,6 +117,10 @@ class RemaxScraper:
         # GPS souřadnice
         map_element = parser.css_first("div#listingMap")
         details["GPS souřadnice"] = map_element.attributes.get("data-gps") if map_element else "N/A"
+
+        # Obrázky
+        image_elements = parser.css("div.gallery__items")
+        details["Obrázky"] = [img.attributes.get("src") for img in image_elements if img.attributes.get("src")]
 
         # Vytvoření hashe po naplnění všech atributů nemovitosti
         hash_input = {k: v for k, v in details.items() if k not in ["URL", "listing_hash"]}

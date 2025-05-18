@@ -21,6 +21,26 @@ def extract_details(container, row_selector, label_selector, value_selector):
             details[label] = value
     return details
 
+def sreality_extract_details(parser):
+    """
+    Extrahuje všechny detaily nemovitosti z bloků Sreality.cz.
+    Vrací slovník {název: hodnota}.
+    """
+    details = {}
+    for row in parser.css("div.MuiStack-root.css-1xhj18k"):
+        label_element = row.css_first("dt")
+        value_element = row.css_first("dd")
+        if label_element and value_element:
+            label = label_element.text(strip=True).rstrip(":")
+            # Najdi všechny vnořené divy (kromě rootu)
+            all_divs = [div for div in value_element.iter() if div is not value_element and div.tag == "div"]
+            div_texts = [div.text(strip=True) for div in all_divs if div.text(strip=True)]
+            if div_texts:
+                value = "\n".join(div_texts)
+            else:
+                value = value_element.text(strip=True)
+            details[label] = value
+    return details
 def load_existing_data(file_path):
     """
     Načte existující CSV soubor, pokud existuje, jinak vrátí prázdný DataFrame se správnými sloupci.

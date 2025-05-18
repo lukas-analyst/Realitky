@@ -4,7 +4,7 @@ import logging
 import asyncio
 import hashlib
 import json
-from core.utils import save_html, extract_details
+from core.utils import save_html, sreality_extract_details
 from selectolax.parser import HTMLParser
 from datetime import datetime
 
@@ -38,22 +38,30 @@ class SRealityScraper:
             url = f"{self.BASE_URL}/{self.location}?strana={page}"
             self.logger.info(f"Fetching page {page}: {url}")
 
-            async with httpx.AsyncClient(follow_redirects=True) as client:
-                response = await client.get(url)
-                response.raise_for_status()
+            try:
+                async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
+                    response = await client.get(url)
+                    response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                self.logger.error(f"HTTP error {e.response.status_code} for {url}")
+                return []
+            except httpx.RequestError as e:
+                self.logger.error(f"Request error: {e} for {url}")
+                return []
 
             html_file = os.path.join(output_dir, f"{current_date}_page_{page}.html")
             save_html(response.text, output_dir, f"{current_date}_page_{page}.html")
             self.logger.info(f"Saved HTML for page {page} to {html_file}")
 
             parser = HTMLParser(response.text)
-            listings = parser.css("div.property")
+            listings_container = parser.css_first("div.css-tq8fjv")
+            listings = listings_container.css("li")
             self.logger.info(f"Found {len(listings)} listings on page {page}")
-
+            
             # Extrakce odkazů na detailní stránky
             detail_links = [
-                "https://www.sreality.cz" + listing.css_first("a.title").attributes["href"]
-                for listing in listings if listing.css_first("a.title")
+                "https://www.sreality.cz" + li.css_first("a.MuiLink-root").attributes["href"]
+                for li in listings if li.css_first("a.MuiLink-root")
             ]
             self.logger.info(f"Extracted {len(detail_links)} detail links from page {page}")
 
@@ -62,11 +70,11 @@ class SRealityScraper:
             results.extend(filter(None, details_list))
 
             # Kontrola, zda je stránkování na poslední stránce
-            next_page = parser.css_first("a.paging-next")
-            if not next_page or next_page.attributes.get("href") == "#":
+            next_button = parser.css_first('button[data-e2e="show-more-btn"]')
+            if not next_button:
                 self.logger.info(f"Reached the last page: {page}")
                 break
-
+            
             page += 1
 
         return results
@@ -85,15 +93,41 @@ class SRealityScraper:
         details = {"ID": property_id, "URL": url}
 
         # Název nemovitosti
-        title_element = parser.css_first("h1.property-title")
+        title_element = parser.css_first("h1.css-h2bhwn")
         details["Název nemovitosti"] = title_element.text(strip=True) if title_element else "N/A"
 
-        # Cena
-        price_element = parser.css_first("span.norm-price")
-        details["Cena"] = price_element.text(strip=True) if price_element else "N/A"
+        # Popis nemovitosti
+        description_container = parser.css_first("pre.css-16eb98b")
+        details["Popis nemovitosti"] = description_container.text(strip=True) if description_container else "N/A"
 
-        # Další detaily (dle potřeby upravte selektory)
-        # ...
+        # Další detaily
+        details.update(sreality_extract_details(parser))
+
+                # GPS souřadnice - najdi první výskyt locality s latitude a longitude
+        script = parser.css_first('script#__NEXT_DATA__')
+        if script:
+            data = json.loads(script.text())
+            coords = None
+        
+            stack = [data]
+            while stack:
+                obj = stack.pop()
+                if isinstance(obj, dict):
+                    # Hledáme klíč "locality" s "latitude" a "longitude"
+                    if "locality" in obj and isinstance(obj["locality"], dict):
+                        loc = obj["locality"]
+                        if "latitude" in loc and "longitude" in loc:
+                            coords = (loc["latitude"], loc["longitude"])
+                            break
+                    stack.extend(obj.values())
+                elif isinstance(obj, list):
+                    stack.extend(obj)
+            if coords:
+                details["GPS souřadnice"] = f"{coords[0]},{coords[1]}"
+            else:
+                details["GPS souřadnice"] = "N/A"
+        else:
+            details["GPS souřadnice"] = "N/A"
 
         # Vytvoření hashe po naplnění všech atributů nemovitosti
         hash_input = {k: v for k, v in details.items() if k not in ["URL", "listing_hash"]}

@@ -2,7 +2,7 @@ import os
 import logging
 from core.utils import save_scraped_data
 from core.websites.remax_scrapper import RemaxScraper
-#from websites.sreality_scrapper import SRealityScraper
+from core.websites.sreality_scrapper import SRealityScraper
 
 # Nastavení logování
 os.makedirs("logs", exist_ok=True)
@@ -22,8 +22,8 @@ async def run_scrapers():
     Spustí všechny scrapery a uloží data do jednotlivých souborů.
     """
     scrapers = [
-        {"scraper": RemaxScraper(location="praha"), "source_web": "remax", "max_pages": 2},
-        #{"scraper": SRealityScraper(location="brno"), "source_web": "sreality", "max_pages": 3},  # Příklad dalšího scraperu
+        {"scraper": RemaxScraper(location="praha"), "source_web": "remax", "max_pages": 1},
+        {"scraper": SRealityScraper(location="brno"), "source_web": "sreality", "max_pages": 1},
     ]
 
     for scraper_config in scrapers:
