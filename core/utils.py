@@ -1,13 +1,36 @@
 import os
-import pandas as pd
-from datetime import datetime
+import aiofiles
+import aiohttp
+import hashlib
+from urllib.parse import urlparse
+import asyncio
 
-def save_html(content, output_dir, filename):
+
+async def save_html(content: str, output_dir: str, filename: str):
     os.makedirs(output_dir, exist_ok=True)
-    filepath = os.path.join(output_dir, filename)
-    with open(filepath, mode="w", encoding="utf-8") as file:
-        file.write(content)
+    async with aiofiles.open(os.path.join(output_dir, filename), "w", encoding="utf-8") as f:
+        await f.write(content)
 
+async def download_image(session, url, img_path):
+    try:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                async with aiofiles.open(img_path, "wb") as f:
+                    await f.write(await resp.read())
+    except Exception as e:
+        print(f"Chyba při stahování obrázku {url}: {e}")
+
+async def save_images(property_id: str, image_urls: list, base_dir: str):
+    prop_dir = os.path.join(base_dir, property_id)
+    os.makedirs(prop_dir, exist_ok=True)
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for idx, url in enumerate(image_urls):
+            img_path = os.path.join(prop_dir, f"image_{idx+1}.jpg")
+            tasks.append(download_image(session, url, img_path))
+        await asyncio.gather(*tasks)
+
+# Funkce pro extrakci detailů z kontejneru pomocí CSS selektorů
 def extract_details(container, row_selector, label_selector, value_selector):
     """Extrahuje detaily z daného kontejneru."""
     details = {}
@@ -21,69 +44,10 @@ def extract_details(container, row_selector, label_selector, value_selector):
             details[label] = value
     return details
 
-def sreality_extract_details(parser):
-    """
-    Extrahuje všechny detaily nemovitosti z bloků Sreality.cz.
-    Vrací slovník {název: hodnota}.
-    """
-    details = {}
-    for row in parser.css("div.MuiStack-root.css-1xhj18k"):
-        label_element = row.css_first("dt")
-        value_element = row.css_first("dd")
-        if label_element and value_element:
-            label = label_element.text(strip=True).rstrip(":")
-            # Najdi všechny vnořené divy (kromě rootu)
-            all_divs = [div for div in value_element.iter() if div is not value_element and div.tag == "div"]
-            div_texts = [div.text(strip=True) for div in all_divs if div.text(strip=True)]
-            if div_texts:
-                value = "\n".join(div_texts)
-            else:
-                value = value_element.text(strip=True)
-            details[label] = value
-    return details
-def load_existing_data(file_path):
-    """
-    Načte existující CSV soubor, pokud existuje, jinak vrátí prázdný DataFrame se správnými sloupci.
-    """
-    columns = ["ID", "Název nemovitosti", "src_web", "ins_dt", "upd_dt", "del_flag"]
-    try:
-        return pd.read_csv(file_path)
-    except FileNotFoundError:
-        # Pokud soubor neexistuje, vrátí prázdný DataFrame se správnými sloupci
-        return pd.DataFrame(columns=columns)
+def hash_listing(details: dict):
+    return hashlib.sha256(str(details).encode("utf-8")).hexdigest()
 
-def save_scraped_data(new_data, source_web, output_dir="./data", filename=None):
-    """
-    Uloží nascrapovaná data do specifického souboru podle zdrojového webu.
-    Pokud soubor existuje, smaže jej. Do názvu souboru přidá dnešní datum.
-    :param new_data: Nová data (list slovníků).
-    :param source_web: Název zdrojového webu (např. 'remax', 'sreality').
-    :param output_dir: Adresář, kam se data uloží.
-    :param filename: Volitelný název souboru (pokud není zadán, vygeneruje se automaticky).
-    """
-    os.makedirs(output_dir, exist_ok=True)
-    current_date = datetime.now().strftime("%Y_%m_%d")
-    if filename is None:
-        file_path = os.path.join(output_dir, f"{source_web}_listings_{current_date}.csv")
-    else:
-        file_path = os.path.join(output_dir, filename)
-
-    # Pokud soubor existuje, smaž ho
-    if os.path.exists(file_path):
-        os.remove(file_path)
-
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    updated_data = pd.DataFrame()
-
-    for record in new_data:
-        # Přidat časové značky a zdrojový web
-        record["src_web"] = source_web
-        record["ins_dt"] = now
-        record["upd_dt"] = now
-        record["del_flag"] = False
-
-        # Přidat nový záznam
-        updated_data = pd.concat([updated_data, pd.DataFrame([record])], ignore_index=True)
-
-    # Uložit data do nového souboru
-    updated_data.to_csv(file_path, index=False)
+def extract_id(url):
+        path = urlparse(url).path
+        parts = [p for p in path.split("/") if p]
+        return parts[-1] if parts else "unknown"

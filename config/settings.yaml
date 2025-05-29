@@ -1,0 +1,53 @@
+# Hlavní konfigurace scraperu
+
+# Výběr webů pro scraping (název = jméno třídy ve složce core/websites)
+websites:
+  - remax
+  - sreality
+  - realitycz
+
+
+# Filtry pro vyhledávání
+filters:
+  location:        # Lokalita (např. Praha, Brno, nebo prázdné pole pro všechny)
+    # - Praha
+    # - Brno
+  property_type:   # Typ nemovitosti (např. Byt, Dům, Pozemek, nebo prázdné pole pro všechny)
+    # - Byt
+    # - Dům
+  mode:            # Režim: prodej/pronajem (nebo prázdné pole pro vše)
+    - prodej
+    # - pronajem
+
+# Výstupní formát a cílové úložiště
+output:
+  format: csv           # csv nebo db
+  csv_path: data/csv/
+  db:
+    enabled: false
+    host: localhost
+    port: 5432
+    user: python
+    password: Lockit.123
+    database: realitky
+
+# Cesty k datům
+paths:
+  html: data/raw/html/
+  cleaned: data/cleaned/
+  images: data/images/
+  
+
+# Další nastavení
+scraper:
+  max_pages: 10         # Maximální počet stránek ke stažení z každého webu (None = všechny)
+  save_html: true       # Ukládat HTML stránky pro ladění
+  save_images: true     # Ukládat obrázky nemovitostí
+  user_agent: "Mozilla/5.0 (compatible; RealitkyScraper/1.0; +https://example.com/bot)"
+  parallel_websites: 2  # Kolik webů scrapovat paralelně
+  parallel_details: 10  # Kolik detailů nemovitostí scrapovat paralelně
+
+# Logování
+logging:
+  level: INFO
+  file: logs/scraper.log
