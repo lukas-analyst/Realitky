@@ -4,7 +4,6 @@
 Projekt pro hromadný scraping realitních webů, ukládání detailů nemovitostí a obrázků, čištění a sjednocení dat.
 
 ### Weby
-- Seznam realitek:
 - Remax.cz
 - Bezrealitky
 - Bidli
@@ -38,6 +37,8 @@ Nastavení v `config/settings.yaml`:
 ## Spuštění
 ```bash
 python scripts/run_scraper.py
+
+```
 
 ## Struktura
 Realitky/
