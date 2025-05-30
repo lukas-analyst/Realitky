@@ -1,77 +1,73 @@
-import os
+import asyncio
 import httpx
-import json
-from core.base_scraper import BaseScraper
+from core.websites.utils.save_to_csv import save_to_csv
+from core.websites.utils.save_to_json import save_to_json
+from core.websites.utils.save_raw_to_postgres import save_raw_to_postgres
 
-class SrealityApiScraper(BaseScraper):
+class SrealityScraper:
     BASE_URL = "https://www.sreality.cz/api/cs/v2/estates"
-    PER_PAGE = 2  # Maximum allowed by API
+    DETAIL_URL = "https://www.sreality.cz/api/cs/v2/estates/{}"
+    NAME = "sreality"
 
-    async def fetch_listings(self, max_pages: int = None):
-        self.logger.info("Fetching Sreality API listings")
-        results = []
-        page = 1
+    def __init__(self, config, filters, output_paths, logger):
+        self.per_page = config.get("scraper", {}).get("per_page", 10)
+        self.pages = config.get("scraper", {}).get("max_pages", 2)
+        self.output_paths = output_paths
+        self.logger = logger
 
-        # První request pro zjištění počtu inzerátů
-        params = {"per_page": self.PER_PAGE, "page": page}
+    async def fetch_page(self, page):
+        params = {"per_page": self.per_page, "page": page}
         async with httpx.AsyncClient() as client:
             response = await client.get(self.BASE_URL, params=params)
             response.raise_for_status()
             data = response.json()
-            result_size = data.get('result_size', 0)
-            total_pages = (result_size // self.PER_PAGE) + (1 if result_size % self.PER_PAGE else 0)
-            # if max_pages:
-            #     total_pages = min(total_pages, max_pages)
-            # For testing purposes, limit max_pages to 2
-            total_pages = min(total_pages, 2)
+            return data.get('_embedded', {}).get('estates', [])
 
-        # Stáhni všechny stránky
-        for page in range(1, total_pages + 1):
-            params = {"per_page": self.PER_PAGE, "page": page}
+    async def fetch_detail(self, hash_id):
+        try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(self.BASE_URL, params=params)
+                response = await client.get(self.DETAIL_URL.format(hash_id))
                 response.raise_for_status()
-                data = response.json()
-                estates = data.get('_embedded', {}).get('estates', [])
-                for estate in estates:
-                    details = {
-                        "id": estate.get('hash_id'),
-                        "name": estate.get('name'),
-                        "labelsAll": estate.get('labelsAll'),
-                        "exclusively_at_rk": estate.get('exclusively_at_rk'),
-                        "category": estate.get('category'),
-                        "has_floor_plan": estate.get('has_floor_plan'),
-                        "locality": estate.get('locality'),
-                        "new": estate.get('new'),
-                        "type": estate.get('type'),
-                        "price": estate.get('price'),
-                        "seo_category_main_cb": estate.get('seo', {}).get('category_main_cb'),
-                        "seo_category_sub_cb": estate.get('seo', {}).get('category_sub_cb'),
-                        "seo_category_type_cb": estate.get('seo', {}).get('category_type_cb'),
-                        "seo_locality": estate.get('seo', {}).get('locality'),
-                        "price_czk_value_raw": estate.get('price_czk', {}).get('value_raw'),
-                        "price_czk_unit": estate.get('price_czk', {}).get('unit'),
-                        "links_iterator_href": estate.get('_links', {}).get('iterator', {}).get('href'),
-                        "links_self_href": estate.get('_links', {}).get('self', {}).get('href'),
-                        "links_images": estate.get('_links', {}).get('images'),
-                        "gps_lat": estate.get('gps', {}).get('lat'),
-                        "gps_lon": estate.get('gps', {}).get('lon'),
-                        "price_czk_alt_value_raw": estate.get('price_czk', {}).get('alt', {}).get('value_raw') if estate.get('price_czk', {}).get('alt') else None,
-                        "price_czk_alt_unit": estate.get('price_czk', {}).get('alt', {}).get('unit') if estate.get('price_czk', {}).get('alt') else None,
-                        "embedded_company_url": estate.get('_embedded', {}).get('company', {}).get('url'),
-                        "embedded_company_id": estate.get('_embedded', {}).get('company', {}).get('id'),
-                        "embedded_company_name": estate.get('_embedded', {}).get('company', {}).get('name'),
-                        "embedded_company_logo_small": estate.get('_embedded', {}).get('company', {}).get('logo_small'),
-                    }
-                    results.append(details)
-            self.logger.info(f"Fetched page {page}/{total_pages} ({len(estates)} estates)")
+                return response.json()
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 410:
+                self.logger.warning(f"Listing {hash_id} was removed (410 Gone). Skipping.")
+            else:
+                self.logger.error(f"HTTP error while downloading detail {hash_id}: {e}")
+        except Exception as e:
+            self.logger.error(f"General error while downloading detail {hash_id}: {e}")
+        return None
 
-        # Uložení do JSON
-        output_dir = self.output_paths.get("json", "data/json/")
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, "sreality_api_list.json")
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(results, f, ensure_ascii=False, indent=2)
-        self.logger.info(f"Výsledky uloženy do: {output_path}")
+    async def fetch_listings(self, max_pages=None):
+        pages = max_pages or self.pages
+        self.logger.info("Starting to download the list of properties from Sreality API...")
+        all_estates = []
+        for page in range(1, pages + 1):
+            estates = await self.fetch_page(page)
+            self.logger.info(f"Page {page}: {len(estates)} properties")
+            all_estates.extend(estates)
+        self.logger.info(f"Total found {len(all_estates)} properties on {pages} pages.")
 
-        return results
+        if not all_estates:
+            self.logger.warning("No properties found, script is ending.")
+            return
+
+        self.logger.info("Downloading details of all properties...")
+        tasks = [self.fetch_detail(estate["hash_id"]) for estate in all_estates]
+        final_data = []
+        for estate, detail in zip(all_estates, await asyncio.gather(*tasks)):
+            if detail is not None:
+                detail["id"] = estate["hash_id"]
+                final_data.append(detail)
+        self.logger.info(f"Downloaded details: {len(final_data)}")
+
+        # Save to CSV
+        csv_path = self.output_paths.get("csv", "data/raw/csv/sreality/sreality.csv")
+        save_to_csv(final_data, csv_path, True)
+        # Save to JSON
+        json_dir = self.output_paths.get("json", "data/raw/json/sreality")
+        save_to_json(final_data, json_dir, self.NAME, True)
+        # Save to PostgreSQL
+        save_raw_to_postgres(final_data, self.NAME, "id")
+
+        self.logger.info("Sreality scraper finished successfully.")

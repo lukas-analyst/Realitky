@@ -1,15 +1,8 @@
 import os
 import aiofiles
 import aiohttp
-import hashlib
 from urllib.parse import urlparse
 import asyncio
-
-
-async def save_html(content: str, output_dir: str, filename: str):
-    os.makedirs(output_dir, exist_ok=True)
-    async with aiofiles.open(os.path.join(output_dir, filename), "w", encoding="utf-8") as f:
-        await f.write(content)
 
 async def download_image(session, url, img_path):
     try:
@@ -44,8 +37,6 @@ def extract_details(container, row_selector, label_selector, value_selector):
             details[label] = value
     return details
 
-def hash_listing(details: dict):
-    return hashlib.sha256(str(details).encode("utf-8")).hexdigest()
 
 def extract_id(url):
         path = urlparse(url).path

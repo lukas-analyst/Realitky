@@ -34,6 +34,7 @@ output:
 # Cesty k datům
 paths:
   html: data/raw/html/
+  raw: data/raw/
   cleaned: data/cleaned/
   images: data/images/
   
@@ -47,7 +48,12 @@ scraper:
   parallel_websites: 2  # Kolik webů scrapovat paralelně
   parallel_details: 10  # Kolik detailů nemovitostí scrapovat paralelně
 
+test_mode:
+  enabled: true         # Pokud true, použije testovací limity
+  max_pages: 2
+  per_page: 10
+
 # Logování
 logging:
-  level: INFO
+  level: INFO           # Úroveň logování (DEBUG, INFO, WARNING, ERROR, CRITICAL)
   file: logs/scraper.log

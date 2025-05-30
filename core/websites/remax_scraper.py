@@ -1,15 +1,19 @@
 import os
 import httpx
-import logging
 import hashlib
 import json
 import asyncio
 from selectolax.parser import HTMLParser
 from core.base_scraper import BaseScraper
-from core.utils import save_html, save_images, extract_details, extract_id
+from core.websites.utils.save_html import save_html
+from core.websites.utils.save_to_csv import save_to_csv
+from core.websites.utils.save_to_json import save_to_json
+from core.websites.utils.save_raw_to_postgres import save_raw_to_postgres
+from core.utils import save_images, extract_details, extract_id
 
 class RemaxScraper(BaseScraper):
     BASE_URL = "https://www.remax-czech.cz"
+    NAME = "remax"
 
     async def fetch_listings(self, max_pages: int = None):
         self.logger.info(f"Fetching listings for location: {self.location}")
@@ -25,7 +29,7 @@ class RemaxScraper(BaseScraper):
                 response.raise_for_status()
 
             await save_html(
-                response.text, self.output_paths["html"], f"remax_page_{page}.html"
+                response.text, os.path.join("data", "raw", "html", "remax"), f"remax_page_{page}.html"
             )
 
             parser = HTMLParser(response.text)
@@ -52,13 +56,25 @@ class RemaxScraper(BaseScraper):
 
             page += 1
 
+        # Save results to CSV and JSON after each page
+        csv_path = self.output_paths.get("csv", "data/raw/csv/remax/remax.csv")
+        save_to_csv(results, csv_path, True)
+        json_dir = self.output_paths.get("json", "data/raw/json/remax/remax.json")
+        save_to_json(results, json_dir, self.NAME, True)
+        # Save raw data to PostgreSQL
+        save_raw_to_postgres(results, self.NAME, "id")
+
         return results
 
     async def fetch_property_details(self, url: str) -> dict:
-        property_id = extract_id(url)
+        try:
+            url_parts = url.split("/")
+            property_id = url_parts[5] if len(url_parts) > 5 else extract_id(url)
+        except Exception:
+            property_id = extract_id(url)
         self.logger.info(f"Fetching details for property ID: {property_id}")
 
-        html_path = os.path.join(self.output_paths["html"], f"remax_{property_id}.html")
+        html_path = os.path.join("data", "raw", "html", "remax", f"remax_{property_id}.html")
         if os.path.exists(html_path):
             self.logger.info(f"Property ID {property_id} already scraped, skipping.")
             return None
@@ -69,19 +85,19 @@ class RemaxScraper(BaseScraper):
                 response.raise_for_status()
 
             await save_html(
-                response.text, self.output_paths["html"], f"remax_{property_id}.html"
+                response.text, os.path.join("data", "raw", "html", "remax"), f"remax_{property_id}.html"
             )
 
             parser = HTMLParser(response.text)
-            details = {"ID": property_id, "URL": url}
+            details = {"id": property_id, "URL": url}
 
             title_element = parser.css_first("h1.h2.pd-header__title")
-            details["Název nemovitosti"] = (
+            details["Property Name"] = (
                 title_element.text(strip=True) if title_element else "N/A"
             )
 
             description_container = parser.css_first("div.pd-base-info__content-collapse-inner")
-            details["Popis nemovitosti"] = (
+            details["Property Description"] = (
                 description_container.text(strip=True) if description_container else "N/A"
             )
 
@@ -108,7 +124,7 @@ class RemaxScraper(BaseScraper):
                 )
 
             map_element = parser.css_first("div#listingMap")
-            details["GPS souřadnice"] = (
+            details["GPS coordinates"] = (
                 map_element.attributes.get("data-gps") if map_element else "N/A"
             )
 
@@ -119,12 +135,12 @@ class RemaxScraper(BaseScraper):
             if image_urls:
                 try:
                     await self.download_images(property_id, image_urls)
-                    details["Obrázky"] = image_urls
+                    details["Images"] = image_urls
                 except Exception as e:
-                    self.logger.error(f"Chyba při stahování obrázků pro {property_id}: {e}")
-                    details["Obrázky"] = "N/A"
+                    self.logger.error(f"Error downloading images for {property_id}: {e}")
+                    details["Images"] = "N/A"
             else:
-                details["Obrázky"] = "N/A"
+                details["Images"] = "N/A"
 
             hash_input = {k: v for k, v in details.items() if k not in ["URL", "listing_hash"]}
             details["listing_hash"] = hashlib.sha256(
@@ -133,10 +149,11 @@ class RemaxScraper(BaseScraper):
 
             self.logger.info(f"Details for property ID {property_id} fetched successfully.")
             return details
+        
 
         except Exception as e:
-            self.logger.error(f"Chyba při zpracování detailu {property_id}: {e}")
+            self.logger.error(f"Error processing details for {property_id}: {e}")
             return None
 
-    # async def download_images(self, property_id: str, image_urls: list):
-    #     await save_images(property_id, image_urls, self.output_paths["images"])
+    async def download_images(self, property_id: str, image_urls: list):
+        await save_images(property_id, image_urls, self.output_paths["images"])
