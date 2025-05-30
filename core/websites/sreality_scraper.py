@@ -1,132 +1,77 @@
 import os
 import httpx
-import logging
-import hashlib
 import json
-import asyncio
-from selectolax.parser import HTMLParser
 from core.base_scraper import BaseScraper
-from core.utils import save_html, extract_details, extract_id
 
-class SRealityScraper(BaseScraper):
-    BASE_URL = "https://www.sreality.cz"
+class SrealityApiScraper(BaseScraper):
+    BASE_URL = "https://www.sreality.cz/api/cs/v2/estates"
+    PER_PAGE = 2  # Maximum allowed by API
 
-    async def fetch_listings(self, max_pages: int = 1):
-        self.logger.info(f"Fetching listings for location: {self.location}")
+    async def fetch_listings(self, max_pages: int = None):
+        self.logger.info("Fetching Sreality API listings")
         results = []
         page = 1
 
-        # Pouze první stránka
-        url = f"{self.BASE_URL}/hledani/prodej?lokalita={self.location}&strana={page}"
-        self.logger.info(f"Fetching page {page}: {url}")
-
-        async with httpx.AsyncClient(follow_redirects=True) as client:
-            response = await client.get(url)
+        # První request pro zjištění počtu inzerátů
+        params = {"per_page": self.PER_PAGE, "page": page}
+        async with httpx.AsyncClient() as client:
+            response = await client.get(self.BASE_URL, params=params)
             response.raise_for_status()
+            data = response.json()
+            result_size = data.get('result_size', 0)
+            total_pages = (result_size // self.PER_PAGE) + (1 if result_size % self.PER_PAGE else 0)
+            # if max_pages:
+            #     total_pages = min(total_pages, max_pages)
+            # For testing purposes, limit max_pages to 2
+            total_pages = min(total_pages, 2)
 
-        await save_html(
-            response.text, self.output_paths["html"], f"sreality_page_{page}.html"
-        )
+        # Stáhni všechny stránky
+        for page in range(1, total_pages + 1):
+            params = {"per_page": self.PER_PAGE, "page": page}
+            async with httpx.AsyncClient() as client:
+                response = await client.get(self.BASE_URL, params=params)
+                response.raise_for_status()
+                data = response.json()
+                estates = data.get('_embedded', {}).get('estates', [])
+                for estate in estates:
+                    details = {
+                        "id": estate.get('hash_id'),
+                        "name": estate.get('name'),
+                        "labelsAll": estate.get('labelsAll'),
+                        "exclusively_at_rk": estate.get('exclusively_at_rk'),
+                        "category": estate.get('category'),
+                        "has_floor_plan": estate.get('has_floor_plan'),
+                        "locality": estate.get('locality'),
+                        "new": estate.get('new'),
+                        "type": estate.get('type'),
+                        "price": estate.get('price'),
+                        "seo_category_main_cb": estate.get('seo', {}).get('category_main_cb'),
+                        "seo_category_sub_cb": estate.get('seo', {}).get('category_sub_cb'),
+                        "seo_category_type_cb": estate.get('seo', {}).get('category_type_cb'),
+                        "seo_locality": estate.get('seo', {}).get('locality'),
+                        "price_czk_value_raw": estate.get('price_czk', {}).get('value_raw'),
+                        "price_czk_unit": estate.get('price_czk', {}).get('unit'),
+                        "links_iterator_href": estate.get('_links', {}).get('iterator', {}).get('href'),
+                        "links_self_href": estate.get('_links', {}).get('self', {}).get('href'),
+                        "links_images": estate.get('_links', {}).get('images'),
+                        "gps_lat": estate.get('gps', {}).get('lat'),
+                        "gps_lon": estate.get('gps', {}).get('lon'),
+                        "price_czk_alt_value_raw": estate.get('price_czk', {}).get('alt', {}).get('value_raw') if estate.get('price_czk', {}).get('alt') else None,
+                        "price_czk_alt_unit": estate.get('price_czk', {}).get('alt', {}).get('unit') if estate.get('price_czk', {}).get('alt') else None,
+                        "embedded_company_url": estate.get('_embedded', {}).get('company', {}).get('url'),
+                        "embedded_company_id": estate.get('_embedded', {}).get('company', {}).get('id'),
+                        "embedded_company_name": estate.get('_embedded', {}).get('company', {}).get('name'),
+                        "embedded_company_logo_small": estate.get('_embedded', {}).get('company', {}).get('logo_small'),
+                    }
+                    results.append(details)
+            self.logger.info(f"Fetched page {page}/{total_pages} ({len(estates)} estates)")
 
-        parser = HTMLParser(response.text)
-        listings_container = parser.css_first("div.css-tq8fjv")
-        if not listings_container:
-            self.logger.warning(f"No listings container found on page {page}")
-            return results
-
-        listings = listings_container.css("li")
-        self.logger.info(f"Found {len(listings)} listings on page {page}")
-
-        # Vezmeme pouze první detail link
-        detail_link = None
-        for li in listings:
-            a = li.css_first("a.MuiLink-root")
-            if a and "href" in a.attributes:
-                detail_link = self.BASE_URL + a.attributes["href"]
-                break
-
-        if detail_link:
-            self.logger.info(f"Testing only first detail link: {detail_link}")
-            details = await self.fetch_property_details(detail_link)
-            if details:
-                results.append(details)
-        else:
-            self.logger.warning("No detail link found on first page.")
+        # Uložení do JSON
+        output_dir = self.output_paths.get("json", "data/json/")
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, "sreality_api_list.json")
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        self.logger.info(f"Výsledky uloženy do: {output_path}")
 
         return results
-
-    async def fetch_property_details(self, url: str) -> dict:
-        property_id = extract_id(url)
-        self.logger.info(f"Fetching details for property ID: {property_id}")
-
-        html_path = os.path.join(self.output_paths["html"], f"sreality_{property_id}.html")
-        if os.path.exists(html_path):
-            self.logger.info(f"Property ID {property_id} already scraped, skipping.")
-            return None
-
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(url)
-                response.raise_for_status()
-
-            await save_html(
-                response.text, self.output_paths["html"], f"sreality_{property_id}.html"
-            )
-
-            parser = HTMLParser(response.text)
-            details = {"ID": property_id, "URL": url}
-
-            # Název nemovitosti
-            title_element = parser.css_first("h1.css-h2bhwn")
-            details["Název nemovitosti"] = (
-                title_element.text(strip=True) if title_element else "N/A"
-            )
-
-            # Popis nemovitosti
-            description_container = parser.css_first("pre.css-16eb98b")
-            details["Popis nemovitosti"] = (
-                description_container.text(strip=True) if description_container else "N/A"
-            )
-
-            # Další detaily (implementujte podle potřeby)
-            # details.update(extract_details(...))
-
-            # GPS souřadnice z JSON ve scriptu
-            script = parser.css_first('script#__NEXT_DATA__')
-            if script:
-                try:
-                    data = json.loads(script.text())
-                    coords = None
-                    stack = [data]
-                    while stack:
-                        obj = stack.pop()
-                        if isinstance(obj, dict):
-                            if "locality" in obj and isinstance(obj["locality"], dict):
-                                loc = obj["locality"]
-                                if "latitude" in loc and "longitude" in loc:
-                                    coords = (loc["latitude"], loc["longitude"])
-                                    break
-                            stack.extend(obj.values())
-                        elif isinstance(obj, list):
-                            stack.extend(obj)
-                    if coords:
-                        details["GPS souřadnice"] = f"{coords[0]},{coords[1]}"
-                    else:
-                        details["GPS souřadnice"] = "N/A"
-                except Exception as e:
-                    self.logger.error(f"Chyba při extrakci GPS: {e}")
-                    details["GPS souřadnice"] = "N/A"
-            else:
-                details["GPS souřadnice"] = "N/A"
-
-            hash_input = {k: v for k, v in details.items() if k not in ["URL", "listing_hash"]}
-            details["listing_hash"] = hashlib.sha256(
-                json.dumps(hash_input, sort_keys=True, ensure_ascii=False).encode("utf-8")
-            ).hexdigest()
-
-            self.logger.info(f"Details for property ID {property_id} fetched successfully.")
-            return details
-
-        except Exception as e:
-            self.logger.error(f"Chyba při zpracování detailu {property_id}: {e}")
-            return None

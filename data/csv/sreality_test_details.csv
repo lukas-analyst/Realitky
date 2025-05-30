@@ -1,0 +1,21 @@
+id,name,locality,price
+None,{'name': 'Název', 'value': 'Pronájem bytu 3+kk 74\xa0m² (Mezonet)'},{'name': 'Adresa', 'value': 'Vítkovice, okres Semily', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Pronájem bytu 6 pokojů a více 172\xa0m²'},{'name': 'Adresa', 'value': 'Hartigova, Praha 3 - Žižkov', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Prodej bytu 3+kk 77\xa0m²'},{'name': 'Adresa', 'value': 'Marie Podvalové, Praha - Čakovice', 'accuracy': 'not_address'},N/A
+None,{'name': 'Název', 'value': 'Prodej bytu 4+kk 171\xa0m²'},{'name': 'Adresa', 'value': 'Sokolova, Praha', 'accuracy': 'not_address'},N/A
+None,{'name': 'Název', 'value': 'Prodej bytu 2+kk 55\xa0m²'},{'name': 'Adresa', 'value': 'Dunovského, Praha 4 - Chodov', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Pronájem bytu 4+1\xa0144\xa0m²'},{'name': 'Adresa', 'value': 'Náplavní, Praha 2 - Nové Město', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Pronájem bytu 2+kk 37\xa0m²'},{'name': 'Adresa', 'value': 'Pod Lipami, Praha 3 - Žižkov', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Prodej  rodinného domu 314\xa0m², pozemek 314\xa0m²'},{'name': 'Adresa', 'value': 'K Dráze, Plzeň - Koterov', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Prodej  rodinného domu 160\xa0m², pozemek 242\xa0m²'},{'name': 'Adresa', 'value': 'Dělnická, Cheb', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Prodej ubytovacího zařízení 301\xa0m²'},{'name': 'Adresa', 'value': 'Pohraniční stráže, Chodová Planá', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Pronájem ordinace 117\xa0m²'},{'name': 'Adresa', 'value': 'Karlovo náměstí, Praha 2 - Nové Město', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Prodej bytu 3+kk 60\xa0m²'},{'name': 'Adresa', 'value': 'Lázeňská, Dobrá Voda u Českých Budějovic', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Prodej bytu 3+kk 72\xa0m²'},{'name': 'Adresa', 'value': 'Vodní, Hrušovany u Brna', 'accuracy': 'not_address'},N/A
+None,{'name': 'Název', 'value': 'Prodej bytu 3+kk 64\xa0m²'},{'name': 'Adresa', 'value': 'Slaný, okres Kladno', 'accuracy': 'not_address'},N/A
+None,{'name': 'Název', 'value': 'Prodej  stavebního pozemku 722\xa0m²'},{'name': 'Adresa', 'value': 'Nad Humny, Zlín - Prštné', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Prodej bytu 1+kk 41\xa0m²'},{'name': 'Adresa', 'value': 'Palachova, Hradec Králové - Nový Hradec Králové', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Pronájem kanceláře 29\xa0m²'},{'name': 'Adresa', 'value': 'Třebohostická, Praha 10 - Strašnice', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Prodej bytu 3+kk 77\xa0m² (Jednopodlažní)'},{'name': 'Adresa', 'value': 'Honzíkova, Praha 10 - Dolní Měcholupy', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Pronájem kanceláře 122\xa0m²'},{'name': 'Adresa', 'value': 'Třebohostická, Praha 10 - Strašnice', 'accuracy': 'address'},N/A
+None,{'name': 'Název', 'value': 'Pronájem kanceláře 30\xa0m²'},{'name': 'Adresa', 'value': 'Václavské náměstí, Praha 1 - Nové Město', 'accuracy': 'address'},N/A

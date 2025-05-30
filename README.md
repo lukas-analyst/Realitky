@@ -37,10 +37,10 @@ Nastavení v `config/settings.yaml`:
 ## Spuštění
 ```bash
 python scripts/run_scraper.py
-
 ```
 
 ## Struktura
+```
 Realitky/
 │
 ├── core/
@@ -71,3 +71,4 @@ Realitky/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+```

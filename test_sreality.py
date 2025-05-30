@@ -1,57 +1,90 @@
-import json
-import sys
-import os
-import logging
+import asyncio
 import httpx
-from selectolax.parser import HTMLParser
+import json
+import os
+import psycopg2
+from dotenv import load_dotenv
 
-def extract_next_data_json(html: str, logger) -> dict:
-    parser = HTMLParser(html)
-    script = parser.css_first('script#__NEXT_DATA__')
-    if not script:
-        logger.error("Nenalezen script#__NEXT_DATA__")
-        return {}
+BASE_URL = "https://www.sreality.cz/api/cs/v2/estates"
+DETAIL_URL = "https://www.sreality.cz/api/cs/v2/estates/{}"
+PER_PAGE = 10
+PAGES = 2
 
-    try:
-        data = json.loads(script.text())
-        return data
-    except Exception as e:
-        logger.error(f"Chyba při načítání JSON: {e}")
-        return {}
+# Načti .env
+load_dotenv()
+
+def save_to_postgres(details):
+    conn = psycopg2.connect(
+    dbname=os.getenv('DB_NAME'),
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD')
+)
+    cur = conn.cursor()
+    # Vytvořte tabulku jednorázově ručně nebo přidejte CREATE TABLE IF NOT EXISTS
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS sreality_estates (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            locality TEXT,
+            price NUMERIC
+        );
+    """)
+    for detail in details:
+        cur.execute("""
+            INSERT INTO sreality_estates (id, name, locality, price)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (id) DO NOTHING
+        """, (
+            detail.get('hash_id'),
+            detail.get('name'),
+            detail.get('locality'),
+            detail.get('price', {}).get('value_raw', None)
+        ))
+    conn.commit()
+    cur.close()
+    conn.close()
+    print("Výsledek uložen do PostgreSQL tabulky sreality_estates")
+
+async def fetch_page(page):
+    params = {"per_page": PER_PAGE, "page": page}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(BASE_URL, params=params)
+        response.raise_for_status()
+        data = response.json()
+        return data.get('_embedded', {}).get('estates', [])
+
+async def fetch_detail(hash_id):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(DETAIL_URL.format(hash_id))
+        response.raise_for_status()
+        return response.json()
+
+async def main():
+    all_details = []
+    for page in range(1, PAGES + 1):
+        estates = await fetch_page(page)
+        print(f"Stránka {page}: {len(estates)} nemovitostí")
+        tasks = [fetch_detail(estate["hash_id"]) for estate in estates]
+        details = await asyncio.gather(*tasks)
+        for detail in details:
+            print(f"- {detail.get('name')} ({detail.get('locality')})")
+        all_details.extend(details)
+    # # Uložení do CSV
+    # os.makedirs("data/csv", exist_ok=True)
+    # csv_path = "data/csv/sreality_test_details.csv"
+    # with open(csv_path, "w", encoding="utf-8") as f:
+    #     f.write("id,name,locality,price\n")
+    #     for detail in all_details:
+    #         f.write(f"{detail.get('hash_id')},{detail.get('name')},{detail.get('locality')},{detail.get('price', {}).get('value_raw', 'N/A')}\n")
+
+    # # Uložení do JSON
+    # os.makedirs("data/json", exist_ok=True)
+    # with open("data/json/sreality_test_details.json", "w", encoding="utf-8") as f:
+    #     json.dump(all_details, f, ensure_ascii=False, indent=2)
+    # print("Výsledek uložen do data/json/sreality_test_details.json")
+
+    # Uložení do PostgreSQL
+    save_to_postgres(all_details)
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
-        handlers=[logging.StreamHandler()]
-    )
-    logger = logging.getLogger("sreality_json_extract")
-
-    # Pokud je zadán argument, použijeme lokální HTML, jinak stáhneme z webu
-    if len(sys.argv) > 1:
-        html_path = sys.argv[1]
-        logger.info(f"Načítám HTML ze souboru: {html_path}")
-        with open(html_path, "r", encoding="utf-8") as f:
-            html = f.read()
-    else:
-        url = "https://www.sreality.cz/hledani/prodej"
-        logger.info(f"Stahuji HTML z webu: {url}")
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
-        }
-        with httpx.Client(headers=headers, follow_redirects=True) as client:
-            response = client.get(url)
-            response.raise_for_status()
-            html = response.text
-
-    # Uložení celého __NEXT_DATA__ JSON do souboru
-    data = extract_next_data_json(html, logger)
-    if data:
-        output_dir = os.path.join(os.path.dirname(__file__), "data/json/")
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, "sreality_next_data.json")
-        with open(output_path, "w", encoding="utf-8") as out_f:
-            json.dump(data, out_f, ensure_ascii=False, indent=2)
-        logger.info(f"Uloženo do: {output_path}")
-    else:
-        logger.warning("JSON nebyl extrahován.")
+    asyncio.run(main())
