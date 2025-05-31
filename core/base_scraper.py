@@ -8,6 +8,8 @@ class BaseScraper(abc.ABC):
     def __init__(self, config, filters, output_paths, logger):
         self.config = config
         self.location = filters.get("location", None)
+        self.property_type = filters.get("property_type", None)
+        self.mode = filters.get("mode", None)
         self.filters = filters
         self.output_paths = output_paths
         self.logger = logger

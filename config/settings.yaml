@@ -4,7 +4,7 @@
 websites:
   - remax
   - sreality
-  - realitycz
+  - bezrealitky
 
 
 # Filtry pro vyhledávání
@@ -21,15 +21,9 @@ filters:
 
 # Výstupní formát a cílové úložiště
 output:
-  format: csv           # csv nebo db
-  csv_path: data/csv/
-  db:
-    enabled: false
-    host: localhost
-    port: 5432
-    user: python
-    password: Lockit.123
-    database: realitky
+  csv: true          # Uložit data do CSV souboru
+  json: true         # Uložit data do JSON souboru
+  postgres: true     # Uložit data do PostgreSQL databáze
 
 # Cesty k datům
 paths:

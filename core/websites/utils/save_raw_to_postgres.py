@@ -40,7 +40,6 @@ def save_raw_to_postgres(
                 sql.SQL("""
                     INSERT INTO raw.{} (id, data)
                     VALUES (%s, %s)
-                    ON CONFLICT (id) DO NOTHING
                 """).format(sql.Identifier(table_name)),
                 (raw_id, json.dumps(detail, ensure_ascii=False)),
             )
