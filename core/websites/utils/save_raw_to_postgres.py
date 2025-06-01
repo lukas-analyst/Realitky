@@ -2,6 +2,7 @@ import os
 import json
 import psycopg2
 import logging
+import hashlib
 from psycopg2 import sql
 from dotenv import load_dotenv
 from typing import List, Any, Optional
@@ -36,12 +37,17 @@ def save_raw_to_postgres(
             raw_id = detail.get(id_field) or detail.get("hash_id") or detail.get("id")
             if not raw_id:
                 continue
+            # Create a hash of the raw_id and detail for uniqueness
+            hash_input = f"{raw_id}|{json.dumps(detail, sort_keys=True, ensure_ascii=False)}"
+            hash_value = hashlib.sha256(hash_input.encode("utf-8")).hexdigest()
+            detail["hash"] = hash_value
             cur.execute(
                 sql.SQL("""
-                    INSERT INTO raw.{} (id, data)
-                    VALUES (%s, %s)
+                    INSERT INTO raw.{} (id, data, hash)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (hash) DO NOTHING
                 """).format(sql.Identifier(table_name)),
-                (raw_id, json.dumps(detail, ensure_ascii=False)),
+                (raw_id, json.dumps(detail, ensure_ascii=False), hash_value),
             )
         conn.commit()
         cur.close()

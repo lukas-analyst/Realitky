@@ -15,9 +15,7 @@ filters:
   property_type:   # Typ nemovitosti (např. Byt, Dům, Pozemek, nebo prázdné pole pro všechny)
     # - Byt
     # - Dům
-  mode:            # Režim: prodej/pronajem (nebo prázdné pole pro vše)
-    - prodej
-    # - pronajem
+  mode: prodej     # Režim (prodej, pronajem)
 
 # Výstupní formát a cílové úložiště
 output:

@@ -6,6 +6,7 @@ import asyncio
 import re
 from selectolax.parser import HTMLParser
 from core.base_scraper import BaseScraper
+from core.websites.utils.extract_url_id import extract_url_id
 from core.websites.utils.save_html import save_html
 from core.websites.utils.save_to_csv import save_to_csv
 from core.websites.utils.save_to_json import save_to_json
@@ -16,6 +17,10 @@ from core.utils import save_images, extract_details, extract_id
 class BidliScraper(BaseScraper):
     BASE_URL = "https://www.bidli.cz/"
     NAME = "bidli"
+    MODE_MAPPING = {
+        "prodej": "1",
+        "pronajem": "2",
+    }
 
     async def fetch_listings(self, max_pages: int = None):
         self.logger.info(f"Fetching listings for location: {self.location}")
@@ -25,7 +30,11 @@ class BidliScraper(BaseScraper):
         max_pages = max_pages or self.pages
 
         while page < max_pages:
-            url = f"{self.BASE_URL}chci-koupit/list/?akce=1&page={page}"
+            # Compose mode
+            mode_key = (self.mode[0] if isinstance(self.mode, list) and self.mode else self.mode or "prodej").lower()
+            mode_value = self.MODE_MAPPING.get(mode_key, "1")
+            # Construct the URL with the mode and page number
+            url = f"{self.BASE_URL}chci-koupit/list/?akce={mode_value}&page={page}"
             self.logger.info(f"Fetching page {page}: {url}")
 
             async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -78,11 +87,7 @@ class BidliScraper(BaseScraper):
         return results
 
     async def fetch_property_details(self, url: str) -> dict:
-        try:
-            url_parts = url.split("/")
-            property_id = url_parts[6] if len(url_parts) > 6 else extract_id(url)
-        except Exception:
-            property_id = extract_id(url)
+        property_id = extract_url_id(url, "/", -1)
         self.logger.info(f"Fetching details for property ID: {property_id}")
 
         html_path = os.path.join(
@@ -126,9 +131,9 @@ class BidliScraper(BaseScraper):
             details["Price"] = price_container.text(strip=True) if price_container else "N/A"
 
             # Extract additional details from table in div.col-32
-            detail_container = parser.css_first("div.col-32")
-            if detail_container:
-                rows = detail_container.css("tr")
+            tables = parser.css("table")
+            for table in tables:
+                rows = table.css("tr")
                 for row in rows:
                     th = row.css_first("th")
                     td = row.css_first("td")

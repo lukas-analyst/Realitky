@@ -6,6 +6,7 @@ import asyncio
 import re
 from selectolax.parser import HTMLParser
 from core.base_scraper import BaseScraper
+from core.websites.utils.extract_url_id import extract_url_id
 from core.websites.utils.save_html import save_html
 from core.websites.utils.save_to_csv import save_to_csv
 from core.websites.utils.save_to_json import save_to_json
@@ -15,17 +16,20 @@ from core.utils import save_images, extract_details, extract_id
 class BezrealitkyScraper(BaseScraper):
     BASE_URL = "https://www.bezrealitky.cz/"
     NAME = "bezrealitky"
+    
 
     async def fetch_listings(self, max_pages: int = None):
         self.logger.info(f"Fetching listings for location: {self.location}")
         results = []
         page = 1
 
-        # Compose mode and Czechia filter
+        # Compose mode (make sure it's uppercase)
         mode_value = self.mode[0] if isinstance(self.mode, list) and self.mode else (self.mode or "prodej")
         mode = str(mode_value).upper()
         mode_param = f"vyhledat?offerType={mode}"
+        # Compose Czechia region URL
         czechia_url = "&regionOsmIds=R51684&osm_value=Česko&location=exact"
+        # Construct the base URL
         base_url = self.BASE_URL + mode_param + czechia_url
 
         while page <= max_pages:
@@ -85,15 +89,9 @@ class BezrealitkyScraper(BaseScraper):
         return results
 
     async def fetch_property_details(self, url: str) -> dict:
-        try:
-            # Extract ID from URL: between last '/' and first '-' after that
-            match = re.search(r'/(\d+)-', url)
-            if match:
-                property_id = match.group(1)
-            else:
-                property_id = extract_id(url)
-        except Exception:
-            property_id = extract_id(url)
+        # Extract ID from URL: between last '/' and first '-' after that
+        match = re.search(r'/(\d+)-', url)
+        property_id = match.group(1) if match else extract_url_id(url, "/", -1)
         self.logger.info(f"Fetching details for property ID: {property_id}")
 
         html_path = os.path.join("data", "raw", "html", "bezrealitky", f"bezrealitky_{property_id}.html")

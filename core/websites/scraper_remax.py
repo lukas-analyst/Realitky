@@ -5,6 +5,7 @@ import json
 import asyncio
 from selectolax.parser import HTMLParser
 from core.base_scraper import BaseScraper
+from core.websites.utils.extract_url_id import extract_url_id
 from core.websites.utils.save_html import save_html
 from core.websites.utils.save_to_csv import save_to_csv
 from core.websites.utils.save_to_json import save_to_json
@@ -14,6 +15,10 @@ from core.utils import save_images, extract_details, extract_id
 class RemaxScraper(BaseScraper):
     BASE_URL = "https://www.remax-czech.cz"
     NAME = "remax"
+    MODE_MAPPING = {
+        "prodej": "1",
+        "pronajem": "2",
+    }
 
     async def fetch_listings(self, max_pages: int = None):
         self.logger.info(f"Fetching listings for location: {self.location}")
@@ -21,7 +26,9 @@ class RemaxScraper(BaseScraper):
         page = 1
 
         while page <= max_pages:
-            url = f"{self.BASE_URL}/reality/vyhledavani/?ldesc_text={self.location}&sale=1&stranka={page}"
+            mode_key = (self.mode[0] if isinstance(self.mode, list) and self.mode else self.mode or "prodej").lower()
+            mode_value = self.MODE_MAPPING.get(mode_key, "PRODEJ")
+            url = f"{self.BASE_URL}/reality/vyhledavani/?ldesc_text={self.location}&sale={mode_value}&stranka={page}"
             self.logger.info(f"Fetching page {page}: {url}")
 
             async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -67,11 +74,7 @@ class RemaxScraper(BaseScraper):
         return results
 
     async def fetch_property_details(self, url: str) -> dict:
-        try:
-            url_parts = url.split("/")
-            property_id = url_parts[5] if len(url_parts) > 5 else extract_id(url)
-        except Exception:
-            property_id = extract_id(url)
+        property_id = extract_url_id(url, "/", -2)
         self.logger.info(f"Fetching details for property ID: {property_id}")
 
         html_path = os.path.join("data", "raw", "html", "remax", f"remax_{property_id}.html")
