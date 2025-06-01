@@ -10,7 +10,7 @@ from core.websites.utils.save_html import save_html
 from core.websites.utils.save_to_csv import save_to_csv
 from core.websites.utils.save_to_json import save_to_json
 from core.websites.utils.save_raw_to_postgres import save_raw_to_postgres
-from core.utils import save_images, extract_details, extract_id
+from core.utils import save_images, extract_details
 
 class RemaxScraper(BaseScraper):
     BASE_URL = "https://www.remax-czech.cz"

@@ -65,13 +65,13 @@ async def main():
     # await bezrealitky_scraper.fetch_listings(max_pages=max_pages)
     # logger.info("=== Scraping BezRealitky finished ===")
 # 
-    # Run Bidli scraper
-    logger.info("=== Starting Bidli scraper ===")
-    bidli_scraper = BidliScraper(config, filters, output_paths, logger)
-    bidli_scraper.pages = max_pages
-    bidli_scraper.per_page = per_page
-    await bidli_scraper.fetch_listings(max_pages=max_pages)
-    logger.info("=== Scraping Bidli finished ===")
+    # # Run Bidli scraper
+    # logger.info("=== Starting Bidli scraper ===")
+    # bidli_scraper = BidliScraper(config, filters, output_paths, logger)
+    # bidli_scraper.pages = max_pages
+    # bidli_scraper.per_page = per_page
+    # await bidli_scraper.fetch_listings(max_pages=max_pages)
+    # logger.info("=== Scraping Bidli finished ===")
 # 
     # # Run Century21 scraper
     # logger.info("=== Starting Century21 scraper ===")

@@ -1,7 +1,6 @@
 import os
 import aiofiles
 import aiohttp
-from urllib.parse import urlparse
 import asyncio
 
 async def download_image(session, url, img_path):
@@ -36,9 +35,3 @@ def extract_details(container, row_selector, label_selector, value_selector):
             value = value_element.text(strip=True)
             details[label] = value
     return details
-
-
-def extract_id(url):
-        path = urlparse(url).path
-        parts = [p for p in path.split("/") if p]
-        return parts[-1] if parts else "unknown"
