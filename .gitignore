@@ -10,6 +10,7 @@ venv.bak/
 # Raw files
 *.html
 *.json
+*.csv
 
 # Log files
 *.log
