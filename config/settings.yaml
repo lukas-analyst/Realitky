@@ -33,17 +33,16 @@ paths:
 
 # Další nastavení
 scraper:
-  max_pages: 10         # Maximální počet stránek ke stažení z každého webu (None = všechny)
   save_html: true       # Ukládat HTML stránky pro ladění
   save_images: true     # Ukládat obrázky nemovitostí
-  user_agent: "Mozilla/5.0 (compatible; RealitkyScraper/1.0; +https://example.com/bot)"
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Scraper/1.0"
   parallel_websites: 2  # Kolik webů scrapovat paralelně
   parallel_details: 10  # Kolik detailů nemovitostí scrapovat paralelně
 
 test_mode:
   enabled: true         # Pokud true, použije testovací limity
   max_pages: 2
-  per_page: 10
+  per_page: 3
 
 # Logování
 logging:

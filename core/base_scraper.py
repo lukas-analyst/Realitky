@@ -15,14 +15,14 @@ class BaseScraper(abc.ABC):
         self.logger = logger
 
     @abc.abstractmethod
-    async def fetch_listings(self, max_pages: int = None):
+    async def fetch_listings(self, max_pages: int = None, per_page: int = None):
         """
         Stáhne seznam nemovitostí dle filtrů.
         """
         pass
 
     @abc.abstractmethod
-    async def fetch_property_details(self, url: str):
+    async def fetch_property_details(self, url: str) -> dict:
         """
         Stáhne detaily konkrétní nemovitosti.
         """
