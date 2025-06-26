@@ -1,11 +1,12 @@
 # Hlavní konfigurace scraperu
 
 # Výběr webů pro scraping (název = jméno třídy ve složce core/websites)
-websites:
-  - remax
-  - sreality
-  - bezrealitky
-
+remax: true
+sreality: false
+bezrealitky: false
+bidli: false
+century21: false
+idnes: false
 
 # Filtry pro vyhledávání
 filters:
@@ -15,10 +16,13 @@ filters:
   property_type:   # Typ nemovitosti (např. Byt, Dům, Pozemek, nebo prázdné pole pro všechny)
     # - Byt
     # - Dům
-  mode: prodej     # Režim (prodej, pronajem)
+  mode:            # Režim (prodej, pronajem)
+    - Prodej
+    # - Pronájem
 
 # Výstupní formát a cílové úložiště
 output:
+  html: true         # Uložit HTML stránky
   csv: true          # Uložit data do CSV souboru
   json: true         # Uložit data do JSON souboru
   postgres: true     # Uložit data do PostgreSQL databáze
@@ -33,8 +37,7 @@ paths:
 
 # Další nastavení
 scraper:
-  save_html: true       # Ukládat HTML stránky pro ladění
-  save_images: true     # Ukládat obrázky nemovitostí
+  save_images: false     # Ukládat obrázky nemovitostí
   user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Scraper/1.0"
   parallel_websites: 2  # Kolik webů scrapovat paralelně
   parallel_details: 10  # Kolik detailů nemovitostí scrapovat paralelně
@@ -44,7 +47,7 @@ test_mode:
   max_pages: 2
   per_page: 3
 
-# Logování
-logging:
-  level: INFO           # Úroveň logování (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-  file: logs/scraper.log
+# Logging configuration
+logging: true
+logging_level: 'INFO'  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+logging_file: 'logs/ebook_organizer.log'

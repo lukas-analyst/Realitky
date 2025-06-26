@@ -8,55 +8,62 @@ from core.scrapers.utils.hash_details import hash_details
 from core.scrapers.utils.save_to_csv import save_to_csv
 from core.scrapers.utils.save_to_json import save_to_json
 from core.scrapers.utils.save_raw_to_postgres import save_raw_to_postgres
-from core.utils import save_images
+from core.scrapers.utils.reverse_geocoding_osm import dms_to_decimal
+from core.scrapers.utils.reverse_geocoding_osm import reverse_geocoding_osm
+from core.scrapers.utils.get_ruian import get_ruian
 
 class RemaxScraper(BaseScraper):
     BASE_URL = "https://www.remax-czech.cz"
     NAME = "remax"
-    MODE_MAPPING = {
-        "prodej": "1",
-        "pronajem": "2",
-    }
 
-    async def fetch_listings(self, max_pages: int = None, per_page: int = None):
-        self.logger.info(f"Fetching listings for location: {self.location}")
+    async def fetch_listings(self, filters_config,  scraper_config, output_config, max_pages, per_page):
+        self.filters_config = filters_config
+        self.scraper_config = scraper_config 
+        self.output_config = output_config
+        self.max_pages = max_pages
+        self.per_page = per_page
+
         results = []
         page = 1
+        modes = self.filters_config.get("mode")
 
-        while max_pages is None or page <= max_pages:
-            mode_key = (self.mode[0] if isinstance(self.mode, list) and self.mode else self.mode or "prodej").lower()
-            mode_value = self.MODE_MAPPING.get(mode_key, "PRODEJ")
-            url = f"{self.BASE_URL}/reality/vyhledavani/?ldesc_text={self.location}&sale={mode_value}&stranka={page}"
-            self.logger.info(f"Fetching page {page}: {url}")
+        if not isinstance(modes, list):
+            modes = [modes]
+        for mode in modes: ########################
+            while max_pages is None or page <= max_pages:
+                mode_key = (self.mode[0] if isinstance(self.mode, list) and self.mode else self.mode or "prodej").lower()
+                mode_value = self.MODE_MAPPING.get(mode_key, "PRODEJ")
+                url = f"{self.BASE_URL}/reality/vyhledavani/?ldesc_text={self.location}&sale={mode_value}&stranka={page}"
+                self.logger.info(f"Fetching page {page}: {url}")
 
-            parser = await download_and_parse_html(
-                url, os.path.join("data", "raw", "html", "remax"), f"remax_page_{page}.html"
-            )
+                parser = await download_and_parse_html(
+                    url, os.path.join("data", "raw", "html", "remax"), f"remax_page_{page}.html"
+                )
 
-            listings = parser.css("div.pl-items__item")
-            self.logger.info(f"Found {len(listings)} listings on page {page}")
+                listings = parser.css("div.pl-items__item")
+                self.logger.info(f"Found {len(listings)} listings on page {page}")
 
-            detail_links = [
-                self.BASE_URL + a.attributes["href"]
-                for listing in listings
-                if (a := listing.css_first("a.pl-items__link"))
-            ]
+                detail_links = [
+                    self.BASE_URL + a.attributes["href"]
+                    for listing in listings
+                    if (a := listing.css_first("a.pl-items__link"))
+                ]
 
-            if per_page is not None:
-                detail_links = detail_links[:per_page]
+                if per_page is not None:
+                    detail_links = detail_links[:per_page]
 
-            self.logger.info(f"Extracted {len(detail_links)} detail links from page {page}")
+                self.logger.info(f"Extracted {len(detail_links)} detail links from page {page}")
 
-            tasks = [self.fetch_property_details(link) for link in detail_links]
-            details_list = await asyncio.gather(*tasks)
-            results.extend(filter(None, details_list))
+                tasks = [self.fetch_property_details(link) for link in detail_links]
+                details_list = await asyncio.gather(*tasks)
+                results.extend(filter(None, details_list))
 
-            next_page = parser.css_first("a.page-link[title='další']")
-            if not next_page or next_page.attributes.get("href") == "#":
-                self.logger.info(f"Reached the last page: {page}")
-                break
+                next_page = parser.css_first("a.page-link[title='další']")
+                if not next_page or next_page.attributes.get("href") == "#":
+                    self.logger.info(f"Reached the last page: {page}")
+                    break
 
-            page += 1
+                page += 1
 
         # Save results to CSV and JSON after all pages
         csv_path = self.output_paths.get("csv", "data/raw/csv/remax")
@@ -85,11 +92,11 @@ class RemaxScraper(BaseScraper):
 
             # Název
             title_element = parser.css_first("h1.h2.pd-header__title")
-            details["Property Name"] = title_element.text(strip=True) if title_element else "N/A"
+            details["Property Name"] = title_element.text(strip=True) if title_element else "XNA"
 
             # Popis
             description_container = parser.css_first("div.pd-base-info__content-collapse-inner")
-            details["Property Description"] = description_container.text(strip=True) if description_container else "N/A"
+            details["Property Description"] = description_container.text(strip=True) if description_container else "XNA"
 
             # Cena a základní detaily
             price_container = parser.css_first("div.pd-table__inner")
@@ -117,33 +124,24 @@ class RemaxScraper(BaseScraper):
 
             # GPS
             map_element = parser.css_first("div#listingMap")
-            details["GPS coordinates"] = map_element.attributes.get("data-gps") if map_element else "N/A"
-
-            # Obrázky (zatím pouze příprava)
-            image_elements = parser.css("div.pd-gallery__item img")
-            image_urls = list(
-                {img.attributes["src"] for img in image_elements if "src" in img.attributes}
-            )
-            if image_urls:
-                try:
-                    await self.download_images(property_id, image_urls)
-                    details["Images"] = image_urls
-                except Exception as e:
-                    self.logger.error(f"Error downloading images for {property_id}: {e}")
-                    details["Images"] = "N/A"
-            else:
-                details["Images"] = "N/A"
-
-            details["listing_hash"] = hash_details(details)
-
-            self.logger.info(f"Details for property ID {property_id} fetched successfully.")
-            return details
-
+            dms_coordionates = map_element.attributes.get("data-gps")
+            lat, lng = dms_to_decimal(dms_coordionates)
+            osm_address = reverse_geocoding_osm(lat, lng)
+            details["country"] = osm_address.get("country", "XNA")
+            details["country_code"] = osm_address.get("country_code", "XNA")
+            details["postcode"] = osm_address.get("postcode", "XNA")
+            details["county"] = osm_address.get("county", "XNA")
+            details["municipality"] = osm_address.get("municipality", "XNA")
+            details["house_number"] = osm_address.get("house_number", "XNA")
+            details["state"] = osm_address.get("state", "XNA")
+            details["gps_lat"] =  lat
+            details["gps_lng"] = lng
+            details["ruian_id"] = get_ruian(osm_address) or "XNA"
+        
+            returned_details = hash_details(details, self.NAME)
+            details["hash"] = returned_details["hash"]
+        
         except Exception as e:
             self.logger.error(f"Error processing details for {property_id}: {e}")
             return None
 
-    async def download_images(self, property_id: str, image_urls: list):
-        await save_images(property_id, image_urls, self.output_paths["images"])
-
-# --- připrav si extract_images zde, až bude potřeba ---

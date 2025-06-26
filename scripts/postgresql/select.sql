@@ -15,9 +15,14 @@ SELECT * FROM parsed.remax;
 SELECT * FROM parsed.sreality;
 
 -- Cleaned data
-SELECT * FROM cleaned.bezrealitky;
-SELECT * FROM cleaned.bidli;
-SELECT * FROM cleaned.century21;
-SELECT * FROM cleaned.idnes;
-SELECT * FROM cleaned.remax;
-SELECT * FROM cleaned.sreality;
+SELECT * FROM cleaned.transaction;
+SELECT * FROM cleaned.property_type;
+SELECT * FROM cleaned.property_subtype;
+SELECT * FROM cleaned.macroeconomics;
+SELECT * FROM cleaned.location_statistics;
+SELECT * FROM cleaned.cadastre;
+SELECT * FROM cleaned.cadstre_encumbered;
+SELECT * FROM cleaned.client;
+SELECT * FROM cleaned.loan_simulation;
+SELECT * FROM cleaned.price_estimate;
+SELECT * FROM cleaned.property_risk_score;
