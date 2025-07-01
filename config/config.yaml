@@ -50,4 +50,4 @@ test_mode:
 # Logging configuration
 logging: true
 logging_level: 'INFO'  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
-logging_file: 'logs/ebook_organizer.log'
+logging_file: 'logs/realitky.log'
