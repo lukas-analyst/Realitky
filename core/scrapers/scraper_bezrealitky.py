@@ -118,6 +118,21 @@ class BezrealitkyScraper(BaseScraper):
             else:
                 details["Cena"] = "N/A"
 
+            # Breadcrumbs - zjednodušená verze
+            breadcrumb_nav = parser.css_first("nav[aria-label='breadcrumb'] ol.breadcrumb")
+            if breadcrumb_nav:
+                # Extrahuj text ze všech breadcrumb položek
+                breadcrumb_texts = []
+                for li in breadcrumb_nav.css("li.breadcrumb-item"):
+                    text = li.text(strip=True)
+                    # Přeskočíme "Domů" a prázdné texty
+                    if text and "Domů" not in text:
+                        breadcrumb_texts.append(text)
+                
+                details["Breadcrumbs"] = " | ".join(breadcrumb_texts) if breadcrumb_texts else "XNA"
+            else:
+                details["Breadcrumbs"] = "XNA"
+
             # Detaily z tabulek
             for detail_container in parser.css("div.ParamsTable_paramsTable__tX8zj.paramsTable"):
                 for tr in detail_container.css("tr"):

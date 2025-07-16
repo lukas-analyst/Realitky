@@ -116,6 +116,14 @@ class idnesScraper(BaseScraper):
             else:
                 details["Cena"] = "N/A"
 
+            price_details = parser.css_first('div.wrapper-price-notes.color-grey.mb-5')
+            if price_details:
+                full_text = price_details.text(strip=True)
+                clean_text = full_text.replace("Poznámka k ceně:", "").strip()
+                details["Price Details"] = clean_text if clean_text else "N/A"
+            else:
+                details["Price Details"] = "N/A"
+
             # Detaily z <div class="b-definition mb-0"> a <div class="b-definition-columns mb-0">
             for definition in parser.css('div.b-definition.mb-0, div.b-definition-columns.mb-0'):
                 dts = definition.css('dt')

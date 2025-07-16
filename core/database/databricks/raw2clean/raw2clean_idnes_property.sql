@@ -6,6 +6,7 @@ USING (
         listing_details_idnes.property_name AS property_name,
         -- address is handled using reverse geolocation --
         'XNA' AS address_street,
+        'XNA' AS address_house_number,
         'XNA' AS ruian_code,
         'XNA' AS address_city,
         'XNA' AS address_state,
@@ -17,15 +18,13 @@ USING (
         COALESCE(property_subtype.property_subtype_id, -1) :: INT AS property_subtype_id,
         COALESCE(REGEXP_REPLACE(listing_details_idnes.pocet_podlazi, '[^0-9]', ''), -1) :: INT AS property_number_of_floors,
         CASE 
-            WHEN LOWER(listing_details_idnes.podlazi) LIKE 'přízemí%' THEN 0
+            WHEN listing_details_idnes.podlazi IN ('zvýšené přízemí (1. NP)','přízemí (1. NP = nadzemní podlaží)') THEN 0
             WHEN listing_details_idnes.podlazi IS null THEN 0
             ELSE REGEXP_EXTRACT(LEFT(listing_details_idnes.podlazi, 3), '(-?[0-9]+)')
         END :: INT AS property_floor_number,
         property_location.property_location_id :: INT AS property_location_id,
         property_construction_type.property_construction_type_id :: INT AS property_construction_type_id,
-        COALESCE(LEFT(
-          COALESCE(listing_details_idnes.celkova_plocha, listing_details_idnes.uzitna_plocha), 
-          LENGTH(COALESCE(listing_details_idnes.celkova_plocha, listing_details_idnes.uzitna_plocha)) - 3) :: DOUBLE, -1) AS area_total_sqm,
+        COALESCE(TRY_CAST(REGEXP_EXTRACT(COALESCE(celkova_plocha, uzitna_plocha), '([0-9]+)', 1) AS DOUBLE), 0) AS area_total_sqm,
         COALESCE(LEFT(listing_details_idnes.plocha_pozemku, LENGTH(listing_details_idnes.plocha_pozemku) -3) :: DOUBLE, -1) AS area_land_sqm,
         COALESCE(listing_details_idnes.pocet_mistnosti, -1) :: INT AS number_of_rooms,
         COALESCE(listing_details_idnes.vystavba_rok, vystavba, kolaudace, -1) :: INT AS construction_year,
@@ -71,7 +70,9 @@ USING (
         COALESCE(listing_details_idnes.property_description, 'XNA') AS description,
         'idnes' AS src_web,
         current_timestamp() AS ins_dt,
+        :process_id AS ins_process_id,
         current_timestamp() AS upd_dt,
+        :process_id AS upd_process_id,
         false AS del_flag
         
     FROM realitky.raw.listing_details_idnes
@@ -170,8 +171,8 @@ USING (
       listing_details_idnes.del_flag = false
 ) AS source
 ON target.property_id = source.property_id
-AND target.src_web = source.src_web
-AND target.del_flag = false
+  AND target.src_web = source.src_web
+  AND target.del_flag = false
 WHEN MATCHED 
 AND target.property_name <> source.property_name
  OR target.property_type_id <> source.property_type_id
@@ -207,6 +208,15 @@ AND target.property_name <> source.property_name
  OR target.description <> source.description
 THEN UPDATE SET
     property_name = source.property_name,
+    address_street = source.address_street,
+    address_house_number = source.address_house_number,
+    ruian_code = source.ruian_code,
+    address_city = source.address_city,
+    address_state = source.address_state,
+    address_postal_code = source.address_postal_code,
+    address_district_code = source.address_district_code,
+    address_latitude = source.address_latitude,
+    address_longitude = source.address_longitude,
     property_type_id = source.property_type_id,
     property_subtype_id = source.property_subtype_id,
     property_number_of_floors = source.property_number_of_floors,
@@ -239,11 +249,13 @@ THEN UPDATE SET
     source_url = source.source_url,
     description = source.description,
     src_web = source.src_web,
-    upd_dt = source.upd_dt
+    upd_dt = source.upd_dt,
+    upd_process_id = source.upd_process_id
 WHEN NOT MATCHED THEN INSERT (
     property_id,
     property_name,
     address_street,
+    address_house_number,
     ruian_code,
     address_city,
     address_state,
@@ -284,12 +296,15 @@ WHEN NOT MATCHED THEN INSERT (
     description,
     src_web,
     ins_dt,
+    ins_process_id,
     upd_dt,
+    upd_process_id,
     del_flag
 ) VALUES (
     source.property_id,
     source.property_name,
     source.address_street,
+    source.address_house_number,
     source.ruian_code,
     source.address_city,
     source.address_state,
@@ -330,15 +345,8 @@ WHEN NOT MATCHED THEN INSERT (
     source.description,
     source.src_web,
     source.ins_dt,
+    source.ins_process_id,
     source.upd_dt,
+    source.upd_process_id,
     source.del_flag
 );
-
--- ===================================================================
--- POST-MERGE OPTIMIZATION
--- ===================================================================
-
--- Optimize the table after merge for better query performance
-
-OPTIMIZE realitky.cleaned.property 
-ZORDER BY (property_type_id, address_city, is_active_listing, src_web);

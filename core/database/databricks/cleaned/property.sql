@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property (
     property_name STRING NOT NULL, -- Název nemovitosti (např. "Prodej bytu 2+kk v Praze")
     
     address_street STRING NOT NULL, -- Ulice
+    address_house_number STRING NOT NULL, -- Číslo popisné/číslo orientační
     ruian_code STRING NOT NULL, -- Kód RÚIAN (pro propojení s demografickými daty ČSÚ)
     address_city STRING NOT NULL, -- Město/obec
     address_state STRING NOT NULL, -- Kraj/stát
@@ -74,6 +75,7 @@ COMMENT ON TABLE realitky.cleaned.property IS 'Základní informace o nemovitost
 COMMENT ON COLUMN realitky.cleaned.property.property_id IS 'Unikátní identifikátor nemovitosti (UUID).';
 COMMENT ON COLUMN realitky.cleaned.property.property_name IS 'Název nemovitosti (např. "Prodej bytu 2+kk v Praze").';
 COMMENT ON COLUMN realitky.cleaned.property.address_street IS 'Ulice.';
+COMMENT ON COLUMN realitky.cleaned.property.address_house_number IS 'Číslo popisné/číslo orientační.';
 COMMENT ON COLUMN realitky.cleaned.property.ruian_code IS 'Kód RÚIAN (pro propojení s demografickými daty ČSÚ).';
 COMMENT ON COLUMN realitky.cleaned.property.address_city IS 'Město/obec.';
 COMMENT ON COLUMN realitky.cleaned.property.address_state IS 'Kraj/stát.';
