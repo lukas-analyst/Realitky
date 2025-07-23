@@ -24,13 +24,16 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_price_h (
     del_flag BOOLEAN NOT NULL -- Příznak smazání záznamu
 )
 USING DELTA
+PARTITIONED BY (src_web, valid_from)
 TBLPROPERTIES (
-    'description' = 'Historická tabulka pro sledování změn cen nemovitostí. Implementuje SCD Type 2 s úplnou historií všech cenových změn.',
+    'description' = 'Historical table for tracking property price changes. Implements SCD Type 2 with full history of all price changes - partitioned by src_web and valid_from for concurrent processing.',
     'delta.autoOptimize.optimizeWrite' = 'true',
     'delta.autoOptimize.autoCompact' = 'true',
     'delta.checkpointRetentionDuration' = 'interval 365 days',
     'delta.deletedFileRetentionDuration' = 'interval 30 days',
-    'delta.logRetentionDuration' = 'interval 90 days'
+    'delta.logRetentionDuration' = 'interval 90 days',
+    'delta.isolationLevel' = 'WriteSerializable',
+    'delta.enableChangeDataFeed' = 'true'
 );
 
 COMMENT ON TABLE realitky.cleaned.property_price_h IS 'Historická tabulka pro sledování změn cen nemovitostí. Implementuje SCD Type 2 s úplnou historií všech cenových změn.';

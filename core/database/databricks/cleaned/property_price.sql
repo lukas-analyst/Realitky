@@ -19,13 +19,16 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_price (
     del_flag BOOLEAN NOT NULL -- Příznak smazání záznamu
 )
 USING DELTA
+PARTITIONED BY (src_web)
 TBLPROPERTIES (
-    'description' = 'Aktuální ceny nemovitostí s možností sledování změn cen v čase',
+    'description' = 'Current property prices with the ability to track price changes over time - partitioned by src_web for concurrent processing',
     'delta.autoOptimize.optimizeWrite' = 'true',
     'delta.autoOptimize.autoCompact' = 'true',
     'delta.checkpointRetentionDuration' = 'interval 30 days',
     'delta.deletedFileRetentionDuration' = 'interval 7 days',
-    'delta.logRetentionDuration' = 'interval 30 days'
+    'delta.logRetentionDuration' = 'interval 30 days',
+    'delta.isolationLevel' = 'WriteSerializable',
+    'delta.enableChangeDataFeed' = 'true'
 );
 
 COMMENT ON TABLE realitky.cleaned.property_price IS 'Aktuální ceny nemovitostí s možností sledování změn cen v čase.';

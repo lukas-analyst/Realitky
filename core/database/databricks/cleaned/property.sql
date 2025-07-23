@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property (
     del_flag BOOLEAN NOT NULL -- Příznak smazání záznamu
 )
 USING DELTA
+PARTITIONED BY (src_web)
 TBLPROPERTIES (
     'description' = 'Základní informace o nemovitostech. Hlavní tabulka obsahující všechny důležité údaje o nemovitostech včetně adres, charakteristik a vybavení.',
     'delta.autoOptimize.optimizeWrite' = 'true',

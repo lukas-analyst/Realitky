@@ -1,83 +1,85 @@
 -- DROP TABLE realitky.cleaned.property_h;
 
 CREATE TABLE IF NOT EXISTS realitky.cleaned.property_h (
-    -- Historické klíče
-    property_h_id BIGINT GENERATED ALWAYS AS IDENTITY,
-    property_id STRING NOT NULL,
+    property_id STRING NOT NULL, -- ID nemovitosti (FK na property)
+    property_name STRING NOT NULL, -- Název nemovitosti (např. "Prodej bytu 2+kk v Praze")
     
-    property_name STRING NOT NULL,
+    address_street STRING NOT NULL, -- Ulice
+    address_house_number STRING NOT NULL, -- Číslo popisné/číslo orientační
+    ruian_code STRING NOT NULL, -- Kód RÚIAN (pro propojení s demografickými daty ČSÚ)
+    address_city STRING NOT NULL, -- Město/obec
+    address_state STRING NOT NULL, -- Kraj/stát
+    address_postal_code STRING NOT NULL, -- PSČ
+    address_district_code STRING, -- Kód městské části/okresu (pro propojení s demografickými daty ČSÚ)
+    address_latitude DECIMAL(9,6) NOT NULL, -- Zeměpisná šířka
+    address_longitude DECIMAL(9,6) NOT NULL, -- Zeměpisná délka
     
-    address_street STRING NOT NULL,
-    ruian_code STRING NOT NULL,
-    address_city STRING NOT NULL,
-    address_state STRING NOT NULL,
-    address_postal_code STRING NOT NULL,
-    address_district_code STRING,
-    address_latitude DECIMAL(9,6) NOT NULL,
-    address_longitude DECIMAL(9,6) NOT NULL,
+    property_type_id BIGINT NOT NULL, -- Byt, dům, pozemek, komerční (FK na property_type)
+    property_subtype_id BIGINT NOT NULL, -- 2+kk, řadový, pole, kancelář (FK na property_subtype)
     
-    property_type_id BIGINT NOT NULL,
-    property_subtype_id BIGINT NOT NULL,
+    property_number_of_floors SMALLINT NOT NULL, -- Počet podlaží (pro domy)
+    property_floor_number SMALLINT NOT NULL, -- Číslo podlaží (pro byty)
+    property_location_id BIGINT NOT NULL, -- Typ lokality (FK na property_location)
+    property_construction_type_id BIGINT NOT NULL, -- Typ konstrukce (panel, cihla, dřevostavba) (FK na property_construction_type)
     
-    property_number_of_floors SMALLINT NOT NULL,
-    property_floor_number SMALLINT NOT NULL,
-    property_location_id BIGINT NOT NULL,
-    property_construction_type_id BIGINT NOT NULL,
+    area_total_sqm DECIMAL(10,2) NOT NULL, -- Celková užitá/zastavěná plocha v m²
+    area_land_sqm DECIMAL(10,2) NOT NULL, -- Plocha pozemku v m² (pro domy/pozemky)
+    number_of_rooms SMALLINT NOT NULL, -- Počet místností
     
-    area_total_sqm DECIMAL(10,2) NOT NULL,
-    area_land_sqm DECIMAL(10,2) NOT NULL,
-    number_of_rooms SMALLINT NOT NULL,
+    construction_year SMALLINT NOT NULL, -- Rok výstavby
+    last_reconstruction_year SMALLINT NOT NULL, -- Rok poslední větší rekonstrukce
+    energy_class_penb STRING NOT NULL, -- Energetická třída (A-G)
+    property_condition STRING NOT NULL, -- Stav nemovitosti (novostavba, dobrý, standard, k rekonstrukci, špatný)
     
-    construction_year SMALLINT NOT NULL,
-    last_reconstruction_year SMALLINT NOT NULL,
-    energy_class_penb STRING NOT NULL,
-    property_condition STRING NOT NULL,
+    property_parking_id BIGINT NOT NULL, -- Typ parkování (FK na property_parking)
+    property_heating_id BIGINT NOT NULL, -- ID vytápění (FK na property_heating)
+    property_electricity_id BIGINT NOT NULL, -- ID elektrické energie (FK na property_electricity)
+    property_accessibility_id BIGINT NOT NULL, -- Typ přístupové cesty (FK na property_accessibility)
     
-    property_parking_id BIGINT NOT NULL,
-    property_heating_id BIGINT NOT NULL,
-    property_electricity_id BIGINT NOT NULL,
-    property_accessibility_id BIGINT NOT NULL,
+    property_balcony SMALLINT NOT NULL, -- Plocha balkonu v m² (pokud je přítomen)
+    property_terrace SMALLINT NOT NULL, -- Plocha terasy v m² (pokud je přítomna)
+    property_cellar SMALLINT NOT NULL, -- Plocha sklepa v m² (pokud je přítomen)
+    property_elevator SMALLINT NOT NULL, -- Zda je přítomen výtah (TRUE/FALSE)
     
-    property_balcony SMALLINT NOT NULL,
-    property_terrace SMALLINT NOT NULL,
-    property_cellar SMALLINT NOT NULL,
-    property_elevator SMALLINT NOT NULL,
+    property_canalization STRING NOT NULL, -- Typ kanalizace
+    property_water_supply_id BIGINT NOT NULL, -- Typ vody na pozemku (FK na property_water_supply)
+    property_air_conditioning STRING NOT NULL, -- Typ klimatizace
+    property_gas_id BIGINT NOT NULL, -- Typ plynu (FK na property_gas)
+    property_internet SMALLINT NOT NULL, -- Zda je přítomen internet (TRUE/FALSE)
     
-    property_canalization STRING NOT NULL,
-    property_water_supply_id BIGINT NOT NULL,
-    property_air_conditioning STRING NOT NULL,
-    property_gas_id BIGINT NOT NULL,
-    property_internet SMALLINT NOT NULL,
+    furnishing_level STRING NOT NULL, -- Částečně zařízeno, nezařízeno, plně zařízeno, null
+    ownership_type STRING NOT NULL, -- Osobní, družstevní, obecní, státní, jiný
+    is_active_listing BOOLEAN NOT NULL, -- Zda je nemovitost aktuálně inzerována
+    source_url STRING NOT NULL, -- URL na inzerát
+    description STRING NOT NULL, -- Popis nemovitosti
     
-    furnishing_level STRING NOT NULL,
-    ownership_type STRING NOT NULL,
-    is_active_listing BOOLEAN NOT NULL,
-    source_url STRING NOT NULL,
-    description STRING NOT NULL,
-    
-    src_web STRING NOT NULL,
-    ins_dt TIMESTAMP NOT NULL,
-    ins_process_id STRING NOT NULL,
-    upd_dt TIMESTAMP NOT NULL,
-    upd_process_id STRING NOT NULL,
-    del_flag BOOLEAN NOT NULL,
-    
-    valid_from TIMESTAMP NOT NULL, -- Datum začátku platnosti záznamu
-    valid_to TIMESTAMP NOT NULL, -- Datum konce platnosti záznamu (31.12.2999)
-    is_current BOOLEAN NOT NULL
+    src_web STRING NOT NULL, -- Zdrojová webová stránka (např. Sreality, Bezrealitky)
+    ins_dt TIMESTAMP NOT NULL, -- Datum vložení záznamu
+    ins_process_id STRING NOT NULL, -- ID procesu, který vložil záznam (pro sledování původu dat)
+    upd_dt TIMESTAMP NOT NULL, -- Datum poslední aktualizace záznamu
+    upd_process_id STRING NOT NULL, -- ID procesu, který naposledy aktualizoval záznam (pro sledování původu dat)
+    del_flag BOOLEAN NOT NULL, -- Příznak smazání záznamu
+
+    valid_from TIMESTAMP NOT NULL, -- Datum a čas, od kdy je záznam platný
+    valid_to TIMESTAMP NOT NULL, -- Datum a čas, do kdy je záznam platný
+    current_flag BOOLEAN NOT NULL -- Příznak, zda je záznam aktuální (TRUE/FALSE)
+)
+USING DELTA
+TBLPROPERTIES (
+    'description' = 'Historizační tabulka pro nemovitosti. Obsahuje všechny důležité údaje o nemovitostech včetně adres, charakteristik a vybavení, s verzováním záznamů.',
+    'delta.autoOptimize.optimizeWrite' = 'true',
+    'delta.autoOptimize.autoCompact' = 'true',
+    'delta.deletedFileRetentionDuration' = 'interval 7 days',
+    'delta.logRetentionDuration' = 'interval 30 days',
+    'delta.checkpointRetentionDuration' = 'interval 30 days'
 );
 
-COMMENT ON TABLE realitky.cleaned.property_h IS 'Historická tabulka pro sledování změn nemovitostí. Implementuje SCD Type 2 s úplnou historií všech změn.';
+COMMENT ON TABLE realitky.cleaned.property_h IS 'Historizační tabulka pro nemovitosti. Obsahuje všechny důležité údaje o nemovitostech včetně adres, charakteristik a vybavení, s verzováním záznamů.';
 
-COMMENT ON COLUMN realitky.cleaned.property_h.property_h_id IS 'Surrogate key pro historickou tabulku (auto-increment).';
-COMMENT ON COLUMN realitky.cleaned.property_h.property_id IS 'Business key - původní ID nemovitosti z hlavní tabulky.';
-COMMENT ON COLUMN realitky.cleaned.property_h.valid_from IS 'Datum začátku platnosti záznamu.';
-COMMENT ON COLUMN realitky.cleaned.property_h.valid_to IS 'Datum konce platnosti záznamu (NULL = aktuální).';
-COMMENT ON COLUMN realitky.cleaned.property_h.is_current IS 'Příznak aktuálního záznamu (TRUE = aktuální, FALSE = historický).';
-COMMENT ON COLUMN realitky.cleaned.property_h.ins_process_id IS 'ID ETL procesu/job run ID, který záznam vložil.';
-COMMENT ON COLUMN realitky.cleaned.property_h.upd_process_id IS 'ID ETL procesu, který záznam aktualizoval.';
+COMMENT ON COLUMN realitky.cleaned.property_h.property_id IS 'ID nemovitosti (FK na property).';
 COMMENT ON COLUMN realitky.cleaned.property_h.property_name IS 'Název nemovitosti (např. "Prodej bytu 2+kk v Praze").';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_street IS 'Ulice.';
+COMMENT ON COLUMN realitky.cleaned.property_h.address_house_number IS 'Číslo popisné/číslo orientační.';
 COMMENT ON COLUMN realitky.cleaned.property_h.ruian_code IS 'Kód RÚIAN (pro propojení s demografickými daty ČSÚ).';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_city IS 'Město/obec.';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_state IS 'Kraj/stát.';
@@ -117,8 +119,10 @@ COMMENT ON COLUMN realitky.cleaned.property_h.is_active_listing IS 'Zda je nemov
 COMMENT ON COLUMN realitky.cleaned.property_h.source_url IS 'URL na inzerát.';
 COMMENT ON COLUMN realitky.cleaned.property_h.description IS 'Popis nemovitosti.';
 COMMENT ON COLUMN realitky.cleaned.property_h.src_web IS 'Zdrojová webová stránka (např. Sreality, Bezrealitky).';
-COMMENT ON COLUMN realitky.cleaned.property_h.ins_dt IS 'Datum vložení záznamu (z původní tabulky).';
-COMMENT ON COLUMN realitky.cleaned.property_h.upd_dt IS 'Datum poslední aktualizace záznamu (z původní tabulky).';
+COMMENT ON COLUMN realitky.cleaned.property_h.ins_dt IS 'Datum vložení záznamu.';
+COMMENT ON COLUMN realitky.cleaned.property_h.ins_process_id IS 'ID procesu, který vložil záznam (pro sledování původu dat).';
+COMMENT ON COLUMN realitky.cleaned.property_h.upd_dt IS 'Datum poslední aktualizace záznamu.';
+COMMENT ON COLUMN realitky.cleaned.property_h.upd_process_id IS 'ID procesu, který naposledy aktualizoval záznam (pro sledování původu dat).';
 COMMENT ON COLUMN realitky.cleaned.property_h.del_flag IS 'Příznak smazání záznamu.';
 
-SELECT * FROM realitky.cleaned.property_h
+SELECT * FROM realitky.cleaned.property_h;

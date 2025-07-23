@@ -33,6 +33,7 @@ COMMENT ON COLUMN realitky.cleaned.property_subtype.del_flag IS 'Příznak smaz�
 -- INSERT DATA INTO TABLE
 INSERT INTO realitky.cleaned.property_subtype (subtype_name, subtype_code, description, ins_dt, upd_dt, del_flag)
 VALUES
+    ('Nespecifikováno', 'NEURCENO', 'Podtyp nemovitosti není specifikován.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     ('1+kk', '1+KK', 'Byt 1+kk je typ bytu s jedním pokojem a kuchyňským koutem.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     ('1+1', '1+1', 'Byt 1+1 je typ bytu s jedním pokojem a samostatnou kuchyní.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     ('2+kk', '2+KK', 'Byt 2+kk je typ bytu s dvěma pokoji a kuchyňským koutem.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
@@ -55,4 +56,6 @@ VALUES
     ('Průmyslový objekt', 'PRUMYSLOVY OBJEKT', 'Průmyslový objekt je budova nebo komplex budov určených pro průmyslovou výrobu nebo skladování.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     ('Obchodní prostor', 'OBCHODNI PROSTOR', 'Obchodní prostor je komerční prostor určený pro maloobchodní nebo velkoobchodní činnost.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     ('Restaurace', 'RESTAURACE', 'Restaurace je podnik poskytující stravovací služby, obvykle s možností posezení.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
-    ('Hotel', 'HOTEL', 'Hotel je ubytovací zařízení poskytující pokoje a další služby pro hosty.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
+    ('Hotel', 'HOTEL', 'Hotel je ubytovací zařízení poskytující pokoje a další služby pro hosty.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
+    ('Pozemek', 'POZEMEK', 'Pozemek je část zemského povrchu, která může být využita pro různé účely, jako je stavba, zemědělství nebo rekreace.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
+    ('Garsoniéra', 'GARSONIERA', 'Garsoniéra je malý byt, obvykle s jedním pokojem, který slouží jako obytný prostor a kuchyň.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);

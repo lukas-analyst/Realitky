@@ -110,29 +110,44 @@ class BezrealitkyScraper(BaseScraper):
                 description_container.text(strip=True) if description_container else "N/A"
             )
 
-            # Cena
+            # Cena (Prodej)
             price_container = parser.css_first("div.justify-content-between.align-items-baseline.mb-lg-9.mb-6.row")
             if price_container:
                 price_span = price_container.css_first("strong.h4.fw-bold span")
-                details["Cena"] = price_span.text(strip=True) if price_span else "N/A"
-            else:
-                details["Cena"] = "N/A"
+                if price_span:
+                    details["Cena"] = price_span.text(strip=True)
 
-            # Breadcrumbs - zjednodušená verze
-            breadcrumb_nav = parser.css_first("nav[aria-label='breadcrumb'] ol.breadcrumb")
-            if breadcrumb_nav:
-                # Extrahuj text ze všech breadcrumb položek
-                breadcrumb_texts = []
-                for li in breadcrumb_nav.css("li.breadcrumb-item"):
-                    text = li.text(strip=True)
-                    # Přeskočíme "Domů" a prázdné texty
-                    if text and "Domů" not in text:
-                        breadcrumb_texts.append(text)
+            # Cena (Pronájem)            
+            price_container_alt = parser.css_first("div.justify-content-between.align-items-baseline.row")
+            if price_container_alt:
+                price_span_alt = price_container_alt.css_first("strong.h4.fw-bold span")
+                if price_span_alt:
+                    details["Cena"] = price_span_alt.text(strip=True)
+
+            # Kategorie
+            category_element = parser.css_first("nav[aria-label='breadcrumb'] ol.breadcrumb")
+            if category_element:
+                category_texts = [
+                    li.text(strip=True)
+                    for li in category_element.css("li.breadcrumb-item")
+                    if li.text(strip=True) and "Domů" not in li.text(strip=True)
+                ]
+                # Remove the first element ("Výpis nemovitostí") if present
+                if category_texts and category_texts[0] == "Výpis nemovitostí":
+                    category_texts = category_texts[1:]
                 
-                details["Breadcrumbs"] = " | ".join(breadcrumb_texts) if breadcrumb_texts else "XNA"
-            else:
-                details["Breadcrumbs"] = "XNA"
-
+                # Get Category
+                details["Category"] = ",".join(category_texts)
+                
+                # Parse categories into specific fields
+                if category_texts:
+                    details["Category_Type"] = category_texts[0] # Pronájem/Prodej
+                    details["Category_Property"] = category_texts[1] # Chaty a chalupy/Pozemek
+                    details["Category_Region"] = category_texts[2] # Pardubický kraj
+                    details["Category_District"] = category_texts[3] # okres Ústí nad Orlicí
+                    details["Category_City"] = category_texts[4] # České Libchavy
+                    details["Category_Description"] = category_texts[5] # Pronájem chaty, chalupy• 2 ložnice bez realitky
+                
             # Detaily z tabulek
             for detail_container in parser.css("div.ParamsTable_paramsTable__tX8zj.paramsTable"):
                 for tr in detail_container.css("tr"):

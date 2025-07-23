@@ -93,8 +93,12 @@ class BidliScraper(BaseScraper):
             details["Property Name"] = title_element.text(strip=True) if title_element else "N/A"
 
             # Popis
-            description_container = parser.css_first("div.col-66")
-            details["Property Description"] = description_container.text(strip=True) if description_container else "N/A"
+            description_element = parser.css_first("#top > div.screen > div.screen-in > div:nth-child(1) > div > div:nth-child(7) > div.col-66 > p")
+            details["Property Description"] = description_element.text(strip=True) if description_element else "N/A"
+
+            # PENB (energetický štítek)
+            penb_type_element = parser.css_first("span.energeticky-stitek-type")
+            details["PENB"] = penb_type_element.text(strip=True)
 
             # Cena
             price_container = parser.css_first("div.h2.orange.bmg-0.t-right")
