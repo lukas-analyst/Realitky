@@ -122,21 +122,6 @@ class RemaxScraper(BaseScraper):
                     )
                 )
 
-            # GPS
-            map_element = parser.css_first("div#listingMap")
-            dms_coordionates = map_element.attributes.get("data-gps")
-            lat, lng = dms_to_decimal(dms_coordionates)
-            osm_address = reverse_geocoding_osm(lat, lng)
-            details["country"] = osm_address.get("country", "XNA")
-            details["country_code"] = osm_address.get("country_code", "XNA")
-            details["postcode"] = osm_address.get("postcode", "XNA")
-            details["county"] = osm_address.get("county", "XNA")
-            details["municipality"] = osm_address.get("municipality", "XNA")
-            details["house_number"] = osm_address.get("house_number", "XNA")
-            details["state"] = osm_address.get("state", "XNA")
-            details["gps_lat"] =  lat
-            details["gps_lng"] = lng
-            details["ruian_id"] = get_ruian(osm_address) or "XNA"
         
             returned_details = hash_details(details, self.NAME)
             details["hash"] = returned_details["hash"]

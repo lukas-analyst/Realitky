@@ -4,9 +4,10 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_parking (
     property_parking_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Unikátní identifikátor typu parkování
     
     parking_name STRING NOT NULL, -- Název typu parkování
-    parking_code STRING, -- Kód typu (např. POZEMEK, ULICE, STANI)
     desc STRING, -- Popis typu parkování
-    
+
+    parking_code STRING, -- Kód typu (např. POZEMEK, ULICE, STANI)
+
     ins_dt TIMESTAMP NOT NULL, -- Datum vložení záznamu
     upd_dt TIMESTAMP NOT NULL, -- Datum poslední aktualizace záznamu
     del_flag BOOLEAN NOT NULL -- Příznak smazání záznamu

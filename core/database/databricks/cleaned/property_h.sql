@@ -1,6 +1,7 @@
 -- DROP TABLE realitky.cleaned.property_h;
 
 CREATE TABLE IF NOT EXISTS realitky.cleaned.property_h (
+    property_h_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Surrogate key pro historickou tabulku
     property_id STRING NOT NULL, -- ID nemovitosti (FK na property)
     property_name STRING NOT NULL, -- Název nemovitosti (např. "Prodej bytu 2+kk v Praze")
     
@@ -60,8 +61,8 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_h (
     upd_process_id STRING NOT NULL, -- ID procesu, který naposledy aktualizoval záznam (pro sledování původu dat)
     del_flag BOOLEAN NOT NULL, -- Příznak smazání záznamu
 
-    valid_from TIMESTAMP NOT NULL, -- Datum a čas, od kdy je záznam platný
-    valid_to TIMESTAMP NOT NULL, -- Datum a čas, do kdy je záznam platný
+    valid_from DATE NOT NULL, -- Datum a čas, od kdy je záznam platný
+    valid_to DATE, -- Datum a čas, do kdy je záznam platný
     current_flag BOOLEAN NOT NULL -- Příznak, zda je záznam aktuální (TRUE/FALSE)
 )
 USING DELTA
@@ -76,6 +77,7 @@ TBLPROPERTIES (
 
 COMMENT ON TABLE realitky.cleaned.property_h IS 'Historizační tabulka pro nemovitosti. Obsahuje všechny důležité údaje o nemovitostech včetně adres, charakteristik a vybavení, s verzováním záznamů.';
 
+COMMENT ON COLUMN realitky.cleaned.property_h.property_h_id IS 'Surrogate key pro historickou tabulku (auto-increment).';
 COMMENT ON COLUMN realitky.cleaned.property_h.property_id IS 'ID nemovitosti (FK na property).';
 COMMENT ON COLUMN realitky.cleaned.property_h.property_name IS 'Název nemovitosti (např. "Prodej bytu 2+kk v Praze").';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_street IS 'Ulice.';
@@ -124,5 +126,8 @@ COMMENT ON COLUMN realitky.cleaned.property_h.ins_process_id IS 'ID procesu, kte
 COMMENT ON COLUMN realitky.cleaned.property_h.upd_dt IS 'Datum poslední aktualizace záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_h.upd_process_id IS 'ID procesu, který naposledy aktualizoval záznam (pro sledování původu dat).';
 COMMENT ON COLUMN realitky.cleaned.property_h.del_flag IS 'Příznak smazání záznamu.';
+COMMENT ON COLUMN realitky.cleaned.property_h.valid_from IS 'Datum a čas, od kdy je záznam platný.';
+COMMENT ON COLUMN realitky.cleaned.property_h.valid_to IS 'Datum a čas, do kdy je záznam platný.';
+COMMENT ON COLUMN realitky.cleaned.property_h.current_flag IS 'Příznak, zda je záznam aktuální (TRUE/FALSE).';
 
 SELECT * FROM realitky.cleaned.property_h;

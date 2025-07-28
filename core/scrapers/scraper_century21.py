@@ -1,146 +1,197 @@
-import os
+# Define async function to fetch property details
 import asyncio
+import httpx
+import hashlib
 import re
-from core.base_scraper import BaseScraper
-from core.scrapers.utils.extract_url_id import extract_url_id
-from core.scrapers.utils.save_to_csv import save_to_csv
-from core.scrapers.utils.save_to_json import save_to_json
-from core.scrapers.utils.save_raw_to_postgres import save_raw_to_postgres
-from core.scrapers.utils.download_and_parse_html import download_and_parse_html
-from core.scrapers.utils.extract_details_from_table import extract_details_from_table
-from core.scrapers.utils.hash_details import hash_details
-from core.utils import save_images
+from selectolax.parser import HTMLParser
+from pyspark.sql.types import StructType, StructField, StringType
+from typing import Optional, Dict
 
-class Century21Scraper(BaseScraper):
-    BASE_URL = "https://www.century21.cz/"
-    NAME = "century21"
-
-    async def fetch_listings(self, max_pages: int = None, per_page: int = None):
-        self.logger.info(f"Fetching listings for location: {self.location}")
-        results = []
-        page = 1
-
-        while max_pages is None or page <= max_pages:
-            url = f"{self.BASE_URL}/nemovitosti?page={page}"
-            self.logger.info(f"Fetching page {page}: {url}")
-
-            parser = await download_and_parse_html(
-                url, os.path.join("data", "raw", "html", "century21"), f"century21_page_{page}.html"
-            )
-
-            listings = parser.css("article.bg-shade-300")
-            self.logger.info(f"Found {len(listings)} listings on page {page}")
-
-            detail_links = []
-            for listing in listings:
-                a_tag = listing.css_first("a[href]")
-                if a_tag:
-                    href = a_tag.attributes.get("href")
-                    if href:
-                        if href.startswith("http"):
-                            detail_links.append(href)
-                        else:
-                            detail_links.append(f"https://www.century21.cz{href}")
-
-            if per_page is not None:
-                detail_links = detail_links[:per_page]
-
-            self.logger.info(f"Extracted {len(detail_links)} detail links from page {page}")
-
-            tasks = [self.fetch_property_details(link) for link in detail_links]
-            details_list = await asyncio.gather(*tasks)
-            results.extend(filter(None, details_list))
-
-            next_page_link = parser.css_first("a.next")
-            if not next_page_link or not next_page_link.attributes.get("href"):
-                self.logger.info(f"Reached the last page: {page}")
-                break
-
-            page += 1
-
-        # Save results to CSV and JSON after all pages
-        csv_path = self.output_paths.get("csv", "data/raw/csv/century21")
-        save_to_csv(results, csv_path, self.NAME, True)
-        json_dir = self.output_paths.get("json", "data/raw/json/century21")
-        save_to_json(results, json_dir, self.NAME, True)
-        save_raw_to_postgres(results, self.NAME, "id")
-
-        return results
-
-    async def fetch_property_details(self, url: str) -> dict:
-        property_id = extract_url_id(url, regex=r'id=([^-]+)')
-        self.logger.info(f"Fetching details for property ID: {property_id}")
-
-        html_dir = os.path.join("data", "raw", "html", "century21")
-        html_path = os.path.join(html_dir, f"century21_{property_id}.html")
-        if os.path.exists(html_path):
-            self.logger.info(f"Property ID {property_id} already scraped, skipping.")
-            return None
-
+class Scraper_details:
+    async def fetch_property_details(self, listing_id: str, listing_url: str) -> Optional[Dict]:
         try:
-            parser = await download_and_parse_html(
-                url, html_dir, f"century21_{property_id}.html"
-            )
-            details = {"id": property_id, "URL": url}
+            # Download HTML content and parse it
+            url = listing_url
+            async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+                parser = HTMLParser(response.text)
 
-            # Název
+            # Define details as dict
+            details = {
+                "listing_id": str(listing_id),
+                "listing_url": str(listing_url),
+            }
+
+            # Extract property name
             title_element = parser.css_first("h3.font-barlow.font-bold")
-            details["Property Name"] = title_element.text(strip=True) if title_element else "N/A"
+            if title_element:
+                details["Property Name"] = str(title_element.text(strip=True))
 
-            # Popis
+            # Extract address point with translate="no" attribute
+            address_point = parser.css_first('p.uppercase.font-barlow.font-medium')
+            if address_point:
+                details["Address Point"] = str(address_point.text(strip=True))
+
+            # Extract property description
             description_container = parser.css_first("div.text-white.font-light.whitespace-break-spaces")
-            details["Property Description"] = (
-                description_container.text(strip=True) if description_container else "N/A"
-            )
+            if description_container:
+                details["Property Description"] = str(description_container.text(strip=True))
 
-            # Cena
-            price_container = parser.css_first("p.font-barlow.font-bold")
-            details["Price"] = price_container.text(strip=True) if price_container else "N/A"
+            # Extract property price and basic details
+            price_container = parser.css("div.bg-primary-300.rounded-b-2xl")
+            for price_div in price_container:
+                p_elements = price_div.css("p")
+                if len(p_elements) > 0:
+                    details["Price Detail"] = str(p_elements[0].text(strip=True))
+                if len(p_elements) > 1:
+                    details["Price"] = str(p_elements[1].text(strip=True))
 
-            # Detaily z tabulek
-            for table in parser.css("table"):
+            # Extract category1, category2, category3 from URL
+            try:
+                url_path = re.sub(r"^https?://[^/]+/", "", listing_url)
+                path_parts = url_path.split("/")
+                if len(path_parts) > 1:
+                    segments = path_parts[1].split("-")
+                    if len(segments) >= 3:
+                        details["category1"] = segments[0]
+                        details["category2"] = segments[1]
+                        details["category3"] = segments[2]
+            except Exception as e:
+                print(f"Error extracting categories from URL for {listing_id}: {e}")
+
+            # Extract property additional details
+            tables_container = parser.css("table.w-full.text-white.border-t-2.border-b-2.border-black")
+            for table in tables_container:
                 details.update(
-                    extract_details_from_table(table, "tr", "th", "td")
+                    self._extract_details_from_table(
+                        table,
+                        "tr",
+                        "th",
+                        "td",
+                    )
                 )
 
-            # GPS z mapy nebo z JS
-            map_element = parser.css_first("div#listingMap")
-            details["GPS coordinates"] = map_element.attributes.get("data-gps") if map_element else "N/A"
-            html_content = parser.html
-            match = re.search(
-                r"LatLng\s*=\s*new google\.maps\.LatLng\(\s*([0-9\.\-]+)\s*,\s*([0-9\.\-]+)\s*\)",
-                html_content,
-            )
-            if match:
-                lat = match.group(1)
-                lng = match.group(2)
-                details["GPS coordinates"] = f"{lat},{lng}"
+            # GPS from <script>self.__next_f.push...
+            gps_found = False
+            try:
+                import re
+                
+                # Get all script tags
+                script_tags = parser.css("script")
+                
+                # First try: look in scripts with both next_f and coordinates
+                for script in script_tags:
+                    script_text = script.text()
+                    if script_text and "self.__next_f.push" in script_text and "coordinates" in script_text:
+                        
+                        # Try specific coordinate patterns
+                        patterns = [
+                            r'"coordinates":\{"latitude":([\d.-]+),"longitude":([\d.-]+)\}',
+                            r'"coordinates":\s*\{\s*"latitude":([\d.-]+),\s*"longitude":([\d.-]+)\s*\}',
+                            r'"latitude":([\d.-]+),"longitude":([\d.-]+)',
+                        ]
+                        
+                        for pattern in patterns:
+                            coord_match = re.search(pattern, script_text, re.IGNORECASE)
+                            if coord_match:
+                                latitude = coord_match.group(1)
+                                longitude = coord_match.group(2)
+                                details["GPS coordinates"] = f"{latitude},{longitude}"
+                                gps_found = True
+                                break
+                        
+                        if gps_found:
+                            break
+                
+                # Second try: look in any script with coordinates (broader search)
+                if not gps_found:
+                    for script in script_tags:
+                        script_text = script.text()
+                        if script_text and "coordinates" in script_text:
+                            
+                            # Try all coordinate patterns
+                            patterns = [
+                                r'"coordinates":\{"latitude":([\d.-]+),"longitude":([\d.-]+)\}',
+                                r'"coordinates":\s*\{\s*"latitude":([\d.-]+),\s*"longitude":([\d.-]+)\s*\}',
+                                r'"latitude":([\d.-]+),"longitude":([\d.-]+)',
+                                r'"lat":([\d.-]+),"lng":([\d.-]+)',
+                                r'"lat":([\d.-]+),"lon":([\d.-]+)',
+                            ]
+                            
+                            for pattern in patterns:
+                                coord_match = re.search(pattern, script_text, re.IGNORECASE)
+                                if coord_match:
+                                    latitude = coord_match.group(1)
+                                    longitude = coord_match.group(2)
+                                    details["GPS coordinates"] = f"{latitude},{longitude}"
+                                    gps_found = True
+                                    break
+                            
+                            if gps_found:
+                                break
+                
+                # Third try: fallback to numerical pattern in any next_f script
+                if not gps_found:
+                    for script in script_tags:
+                        script_text = script.text()
+                        if script_text and "self.__next_f.push" in script_text:
+                            
+                            coord_numbers = re.findall(r'\b(-?[0-9]{1,2}\.\d{4,})\b.*?\b(-?1?[0-9]{1,2}\.\d{4,})\b', script_text)
+                            if coord_numbers:
+                                for lat_str, lon_str in coord_numbers:
+                                    lat = float(lat_str)
+                                    lon = float(lon_str)
+                                    if -90 <= lat <= 90 and -180 <= lon <= 180 and not (abs(lat) < 0.01 and abs(lon) < 0.01):
+                                        details["GPS coordinates"] = f"{lat},{lon}"
+                                        gps_found = True
+                                        break
+                            
+                            if gps_found:
+                                break
+                    
+            except Exception as e:
+                print(f"Error extracting GPS: {e}")
 
-            # Obrázky (zatím pouze příprava)
-            image_elements = parser.css("div.pd-gallery__item img")
-            image_urls = list(
-                {img.attributes["src"] for img in image_elements if "src" in img.attributes}
-            )
-            if image_urls:
-                try:
-                    await self.download_images(property_id, image_urls)
-                    details["Images"] = image_urls
-                except Exception as e:
-                    self.logger.error(f"Error downloading images for {property_id}: {e}")
-                    details["Images"] = "N/A"
-            else:
-                details["Images"] = "N/A"
+            # Generate hash
+            hash_input = {k: v for k, v in details.items() if k not in ["listing_hash", "ins_dt"]}
+            listing_hash = hashlib.sha256(str(sorted(hash_input.items())).encode()).hexdigest()
+            details["listing_hash"] = str(listing_hash)
 
-            details["listing_hash"] = hash_details(details)
-
-            self.logger.info(f"Details for property ID {property_id} fetched successfully.")
             return details
 
         except Exception as e:
-            self.logger.error(f"Error processing details for {property_id}: {e}")
+            print(f"Error processing details for {listing_id}: {e}")
             return None
 
-    async def download_images(self, property_id: str, image_urls: list):
-        await save_images(property_id, image_urls, self.output_paths["images"])
+    def _extract_details_from_table(self, container, row_sel: str, label_sel: str, value_sel: str) -> Dict[str, str]:
+        """Extract details from table-like HTML structure"""
+        details = {}
+        for row in container.css(row_sel):
+            label = row.css_first(label_sel)
+            value = row.css_first(value_sel)
+            if label and value:
+                details[label.text(strip=True)] = str(value.text(strip=True))
+            else:
+                details[label.text(strip=True)] = None
+        print(details)
+        return details
 
-# --- připrav si extract_images zde, až bude potřeba ---
+# Execute the async function
+print(f"Found {df.count()} listings")
+if df.count() > 0:
+    scraper = Scraper_details()
+    parsed_details = await asyncio.gather(*[scraper.fetch_property_details(row.listing_id, row.listing_url) for row in df.collect()])
+    parsed_details = [d for d in parsed_details if d is not None]
+    print(f"Scraped {len(parsed_details)} listings")
+    # Create a DF
+    df_parsed_details = spark.createDataFrame(parsed_details)
+
+else:
+    schema = StructType([
+        StructField("listing_id", StringType(), True),
+        StructField("listing_url", StringType(), True)
+    ])
+    df_parsed_details = spark.createDataFrame([], schema)
+
+display(df_parsed_details)

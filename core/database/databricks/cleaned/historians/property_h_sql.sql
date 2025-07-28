@@ -7,7 +7,51 @@
 
 MERGE INTO realitky.cleaned.property_h AS trg
 USING (
-    SELECT *
+    SELECT 
+        property_id, 
+        property_name,
+        address_street, 
+        address_house_number,
+        ruian_code, 
+        address_city, 
+        address_state, 
+        address_postal_code,
+        address_district_code, 
+        address_latitude, 
+        address_longitude,
+        property_type_id, 
+        property_subtype_id, 
+        property_number_of_floors,
+        property_floor_number,
+        property_location_id, 
+        property_construction_type_id,
+        area_total_sqm,
+        area_land_sqm, 
+        number_of_rooms, 
+        construction_year,
+        last_reconstruction_year,
+        energy_class_penb, 
+        property_condition,
+        property_parking_id,
+        property_heating_id, 
+        property_electricity_id,
+        property_accessibility_id,
+        property_balcony, 
+        property_terrace,
+        property_cellar,
+        property_elevator, 
+        property_canalization,
+        property_water_supply_id,
+        property_air_conditioning, 
+        property_gas_id,
+        property_internet,
+        furnishing_level, 
+        ownership_type, 
+        is_active_listing,
+        source_url,
+        description, 
+        src_web, 
+        del_flag
     FROM realitky.cleaned.property src
     WHERE src.upd_dt::date = :load_date
     AND (:src_web_filter IS NULL OR :src_web_filter = '' OR src.src_web = :src_web_filter)
@@ -58,10 +102,6 @@ USING (
         source_url,
         description, 
         src_web, 
-        ins_dt, 
-        ins_process_id,
-        upd_dt,
-        upd_process_id, 
         del_flag
     FROM realitky.cleaned.property_h hist
     WHERE hist.current_flag = TRUE
@@ -215,8 +255,8 @@ WHEN NOT MATCHED THEN INSERT (
     src.description, 
     src.src_web, 
     src.del_flag,
-    src.ins_dt, 
-    src.ins_process_id, 
+    current_timestamp(),
+    :process_id, 
     current_timestamp(), 
     :process_id,
     :load_date, 

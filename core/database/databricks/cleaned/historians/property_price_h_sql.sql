@@ -1,19 +1,12 @@
 -- TASK 1: property_price_h_sql.sql
 
 -- Najde změněné záznamy - porovná dnešní data s včerejšími
--- Vloží nové verze záznamů, které se změnily
+-- Vloží nové verze záznamů do historické tabulky
 -- Označí je jako aktuální (`is_current = TRUE`)
 
 
 MERGE INTO realitky.cleaned.property_price_h AS trg
 USING (
-    SELECT *
-    FROM realitky.cleaned.property_price src
-    WHERE src.upd_dt::date = :load_date
-    AND (:src_web_filter IS NULL OR :src_web_filter = '' OR src.src_web = :src_web_filter)
-    
-    EXCEPT
-    
     SELECT 
         property_price_id,
         property_id,
@@ -22,11 +15,22 @@ USING (
         currency_code,
         price_type,
         src_web,
-        ins_dt,
-        ins_process_id,
-        upd_dt,
-        upd_process_id,
         del_flag
+    FROM realitky.cleaned.property_price src
+    WHERE src.upd_dt::date = :load_date
+    AND (:src_web_filter IS NULL OR :src_web_filter = '' OR src.src_web = :src_web_filter)
+    
+    EXCEPT
+    
+    SELECT 
+        hist.property_price_id,
+        hist.property_id,
+        hist.price_amount,
+        hist.price_per_sqm,
+        hist.currency_code,
+        hist.price_type,
+        hist.src_web,
+        hist.del_flag
     FROM realitky.cleaned.property_price_h hist
     WHERE hist.is_current = TRUE
     AND (:src_web_filter IS NULL OR :src_web_filter = '' OR hist.src_web = :src_web_filter)
@@ -71,8 +75,8 @@ WHEN NOT MATCHED THEN INSERT (
     src.price_type,
     src.src_web,
     src.del_flag,
-    src.ins_dt,
-    src.ins_process_id,
+    current_timestamp(),
+    :process_id,
     current_timestamp(),
     :process_id,
     :load_date,
