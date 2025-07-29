@@ -10,6 +10,7 @@ USING (
     SELECT 
         property_price_id,
         property_id,
+        property_mode,
         price_amount,
         price_per_sqm,
         currency_code,
@@ -25,6 +26,7 @@ USING (
     SELECT 
         hist.property_price_id,
         hist.property_id,
+        hist.property_mode,
         hist.price_amount,
         hist.price_per_sqm,
         hist.currency_code,
@@ -39,6 +41,7 @@ ON (
     trg.is_current = TRUE
     AND trg.valid_from = :load_date
     AND trg.property_id = src.property_id
+    AND trg.property_mode = src.property_mode
     AND trg.src_web = src.src_web
 )
 WHEN MATCHED THEN UPDATE SET
@@ -53,6 +56,7 @@ WHEN MATCHED THEN UPDATE SET
 WHEN NOT MATCHED THEN INSERT (
     property_price_id,
     property_id,
+    property_mode,
     price_amount,
     price_per_sqm,
     currency_code,
@@ -69,6 +73,7 @@ WHEN NOT MATCHED THEN INSERT (
 ) VALUES (
     src.property_price_id,
     src.property_id,
+    src.property_mode,
     src.price_amount,
     src.price_per_sqm,
     src.currency_code,

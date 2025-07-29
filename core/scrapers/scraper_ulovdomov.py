@@ -47,27 +47,39 @@ class Scraper_details:
                 price_details_text = price_details.text(strip=True)
                 details["Price Details"] = str(price_details_text)
             
-            # Extract property additional details
-            key_value_info = parser.css_first('div[data-test="offerDetail.keyValueInfo"]')
-            if key_value_info:
-                for item in key_value_info.css('div.chakra-stack'):
-                    label_el = item.css_first('p.chakra-text')
-                    if not label_el:
-                        continue
-                    label = label_el.text(strip=True)
-                    # Value can be in <p> or <a><p>
-                    value_el = item.css_first('a > p.chakra-text') or item.css_first('p.chakra-text:not(.css-1szwyl0)')
-                    value = value_el.text(strip=True) if value_el else ""
-                    details[label] = value
+            # Extract property_additional_details
+            parameters = None
+            try:
+                offer_json_script = parser.css_first('script#__NEXT_DATA__')
+                if offer_json_script:
+                    offer_json = json.loads(offer_json_script.text())
+                    offer_data = offer_json["props"]["pageProps"]["offer"]["data"]
+                    parameters = offer_data.get("parameters", {})
+            except Exception as e:
+                print(f"Error loading parameters from __NEXT_DATA__: {e}")
+            if not isinstance(parameters, dict):
+                parameters = {}
+            for key, param in parameters.items():
+                if param is None:
+                    continue
+                title = param.get("title", key)
+                # Some parameters have "options", others only "value"
+                if "options" in param and isinstance(param["options"], list):
+                    if len(param["options"]) == 1:
+                        details[title] = param["options"][0].get("title")
+                    else:
+                        details[title] = ", ".join([opt.get("title", "") for opt in param["options"]])
+                elif "value" in param:
+                    details[title] = param["value"]
+                else:
+                    details[title] = str(param)
 
             # GPS Coordinates
-            # geo = None
-            # if "gps_coordinates" in details:
-            #     geo = details.get("gps_coordinates")
-            # if isinstance(geo, dict) and "lat" in geo and "lng" in geo:
-            #     details["GPS Coordinates"] = str(f"{geo['lat']},{geo['lng']}")
-            # else:
-            #     details["GPS Coordinates"] = None
+            gps_dict = json.loads(gps_coordinates.replace("'", '"'))
+            lat = gps_dict.get("lat")
+            lng = gps_dict.get("lng")
+            if lat is not None and lng is not None:
+                details["GPS Coordinates"] = f"{lat},{lng}"
 
             # Generate hash
             hash_input = {k: v for k, v in details.items() if k not in ["listing_hash", "ins_dt"]}

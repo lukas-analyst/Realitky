@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_price (
     property_price_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Unikátní identifikátor cenového záznamu
     
     property_id STRING NOT NULL, -- ID nemovitosti (FK na property)
+    property_mode STRING NOT NULL, -- Režim nemovitosti (např. prodej, pronájem)
     
     price_amount DECIMAL(15,2) NOT NULL, -- Celková cena nemovitosti v Kč
     price_per_sqm DECIMAL(10,2), -- Cena za m² (vypočítaná jako price_amount/area_total_sqm)
@@ -35,6 +36,7 @@ COMMENT ON TABLE realitky.cleaned.property_price IS 'Aktuální ceny nemovitost�
 
 COMMENT ON COLUMN realitky.cleaned.property_price.property_price_id IS 'Unikátní identifikátor cenového záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_price.property_id IS 'ID nemovitosti (FK na property).';
+COMMENT ON COLUMN realitky.cleaned.property_price.property_mode IS 'Režim nemovitosti (např. prodej, pronájem).';
 COMMENT ON COLUMN realitky.cleaned.property_price.price_amount IS 'Celková cena nemovitosti v Kč.';
 COMMENT ON COLUMN realitky.cleaned.property_price.price_per_sqm IS 'Cena za m² (vypočítaná jako price_amount/area_total_sqm).';
 COMMENT ON COLUMN realitky.cleaned.property_price.currency_code IS 'Měna (CZK, EUR, USD).';

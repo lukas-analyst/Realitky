@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_price_h (
     property_price_id BIGINT NOT NULL, -- Business key - původní ID z hlavní tabulky
     
     property_id STRING NOT NULL, -- ID nemovitosti (FK na property)
+    property_mode STRING NOT NULL, -- Režim nemovitosti (např. prodej, pronájem)
     
     price_amount DECIMAL(15,2) NOT NULL, -- Celková cena nemovitosti v Kč
     price_per_sqm DECIMAL(10,2), -- Cena za m² (vypočítaná jako price_amount/area_total_sqm)
@@ -40,6 +41,7 @@ COMMENT ON TABLE realitky.cleaned.property_price_h IS 'Historická tabulka pro s
 
 COMMENT ON COLUMN realitky.cleaned.property_price_h.property_price_h_id IS 'Surrogate key pro historickou tabulku (auto-increment).';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.property_price_id IS 'Business key - původní ID z hlavní tabulky.';
+COMMENT ON COLUMN realitky.cleaned.property_price_h.property_mode IS 'Režim nemovitosti (např. prodej, pronájem).';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.property_id IS 'ID nemovitosti (FK na property).';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.price_amount IS 'Celková cena nemovitosti v Kč.';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.price_per_sqm IS 'Cena za m² (vypočítaná jako price_amount/area_total_sqm).';

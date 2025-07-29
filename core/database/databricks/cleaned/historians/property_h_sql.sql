@@ -8,7 +8,7 @@
 MERGE INTO realitky.cleaned.property_h AS trg
 USING (
     SELECT 
-        property_id, 
+        property_id,
         property_name,
         address_street, 
         address_house_number,
