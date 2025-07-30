@@ -13,6 +13,8 @@ INSERT INTO realitky.cleaned.property_type (
     type_code_mm,
     type_code_remax,
     type_code_sreality,
+    type_code_tide,
+    type_code_ulovdomov,
     ins_dt,
     upd_dt,
     del_flag
@@ -33,3 +35,16 @@ VALUES
     (13, 'Hotel',              'Hotel je ubytovací zařízení poskytující pokoje a další služby pro hosty.',                                 'HOTEL',              'Hotel',              'HOTEL',              'hotel',              'hotel',              'hotel',              'hotel',              'HOTEL',              'hotel',              'hotel',              'hotel',              CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     (14, 'Komerční nemovitost','Komerční nemovitost zahrnuje budovy a pozemky určené pro podnikání, jako jsou kanceláře, obchody a sklady.','KOMERCNI_NEMOVITOST','Nebytový prostor',  'KOMERCNI NEMOVITOST','komercni_nemovitost','komercni_nemovitost','komercni_nemovitost','komercni_nemovitost','KOMERCNI NEMOVITOST','komercni_nemovitost','komercni_nemovitost','komercni_nemovitost',CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     (15, 'Rekreační objekt',   'Rekreační objekt je nemovitost určená pro rekreaci, jako jsou chaty, chalupy nebo rekreační domy.',        'REKREACNI_OBJEKT',   'Rekreační objekt',   'REKREACNI OBJEKT',   'rekreacni_objekt',   'rekreacni_objekt',   'rekreacni_objekt',   'rekreacni_objekt',   'REKREACNI OBJEKT',   'rekreacni_objekt',   'rekreacni_objekt',   'rekreacni_objekt',   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
+
+update realitky.cleaned.property_type set type_code_century21 = 'byty' where property_type_key = 1;
+update realitky.cleaned.property_type set type_code_century21 = 'domy' where property_type_key = 2;
+update realitky.cleaned.property_type set type_code_century21 = 'pozemky' where property_type_key = 3;
+update realitky.cleaned.property_type set type_code_century21 = 'kancelare' where property_type_key = 4;
+update realitky.cleaned.property_type set type_code_century21 = 'garaz' where property_type_key = 5;
+update realitky.cleaned.property_type set type_code_century21 = 'lisovna' where property_type_key = 10;
+update realitky.cleaned.property_type set type_code_century21 = 'komercni' where property_type_key = 14;
+update realitky.cleaned.property_type set type_code_century21 = 'komplex' where property_type_key = 15;
+update realitky.cleaned.property_type set type_code_century21 = type_code_idnes where property_type_key NOT IN (1, 2, 3, 4, 5, 10, 14, 15);
+
+
+update realitky.cleaned.property_type set type_code_bezrealitky = type_name

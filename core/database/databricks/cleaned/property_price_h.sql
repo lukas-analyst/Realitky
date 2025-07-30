@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_price_h (
     currency_code STRING NOT NULL, -- Měna (CZK, EUR, USD)
     
     price_type STRING NOT NULL, -- Typ ceny (VISIBLE - viditelná cena, HIDDEN - skrytá cena)
+    price_detail STRING, -- Detail ceny (např. "Cena k jednání", "Cena včetně služeb")
     
     src_web STRING NOT NULL, -- Zdrojová webová stránka (např. Sreality, Bezrealitky)
     ins_dt TIMESTAMP NOT NULL, -- Datum vložení záznamu
@@ -47,6 +48,7 @@ COMMENT ON COLUMN realitky.cleaned.property_price_h.price_amount IS 'Celková ce
 COMMENT ON COLUMN realitky.cleaned.property_price_h.price_per_sqm IS 'Cena za m² (vypočítaná jako price_amount/area_total_sqm).';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.currency_code IS 'Měna (CZK, EUR, USD).';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.price_type IS 'Typ ceny (VISIBLE - viditelná cena, HIDDEN - skrytá cena).';
+COMMENT ON COLUMN realitky.cleaned.property_price_h.price_detail IS 'Detail ceny (např. "Cena k jednání", "Cena včetně služeb").';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.src_web IS 'Zdrojová webová stránka (např. Sreality, Bezrealitky).';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.ins_dt IS 'Datum vložení záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_price_h.ins_process_id IS 'ID ETL procesu/job run ID, který záznam vložil.';

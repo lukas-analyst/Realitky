@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_price (
     currency_code STRING NOT NULL, -- Měna (CZK, EUR, USD)
     
     price_type STRING NOT NULL, -- Typ ceny (VISIBLE - viditelná cena, HIDDEN - skrytá cena)
+    price_detail STRING, -- Detail ceny (např. "Cena k jednání", "Cena včetně služeb")
     
     src_web STRING NOT NULL, -- Zdrojová webová stránka (např. Sreality, Bezrealitky)
     ins_dt TIMESTAMP NOT NULL, -- Datum vložení záznamu
@@ -41,6 +42,7 @@ COMMENT ON COLUMN realitky.cleaned.property_price.price_amount IS 'Celková cena
 COMMENT ON COLUMN realitky.cleaned.property_price.price_per_sqm IS 'Cena za m² (vypočítaná jako price_amount/area_total_sqm).';
 COMMENT ON COLUMN realitky.cleaned.property_price.currency_code IS 'Měna (CZK, EUR, USD).';
 COMMENT ON COLUMN realitky.cleaned.property_price.price_type IS 'Typ ceny (VISIBLE - viditelná cena, HIDDEN - skrytá cena).';
+COMMENT ON COLUMN realitky.cleaned.property_price.price_detail IS 'Detail ceny (např. "Cena k jednání", "Cena včetně služeb").';
 COMMENT ON COLUMN realitky.cleaned.property_price.src_web IS 'Zdrojová webová stránka (např. Sreality, Bezrealitky).';
 COMMENT ON COLUMN realitky.cleaned.property_price.ins_dt IS 'Datum vložení záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_price.ins_process_id IS 'ID procesu, který vložil záznam.';

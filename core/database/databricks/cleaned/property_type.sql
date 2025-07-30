@@ -5,17 +5,19 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_type (
     property_type_key BIGINT NOT NULL,
     type_name STRING NOT NULL,
     desc STRING,
-    type_code_accordinvest STRING NOT NULL,
-    type_code_bezrealitky STRING NOT NULL,
-    type_code_bidli STRING NOT NULL,
-    type_code_broker STRING NOT NULL,
-    type_code_gaia STRING NOT NULL,
-    type_code_century21 STRING NOT NULL,
-    type_code_dreamhouse STRING NOT NULL,
-    type_code_idnes STRING NOT NULL,
-    type_code_mm STRING NOT NULL,
-    type_code_remax STRING NOT NULL,
-    type_code_sreality STRING NOT NULL,
+    type_code_accordinvest STRING,
+    type_code_bezrealitky STRING,
+    type_code_bidli STRING,
+    type_code_broker STRING,
+    type_code_gaia STRING,
+    type_code_century21 STRING,
+    type_code_dreamhouse STRING,
+    type_code_idnes STRING,
+    type_code_mm STRING,
+    type_code_remax STRING,
+    type_code_sreality STRING,
+    type_code_tide STRING,
+    type_code_ulovdomov STRING,
     ins_dt TIMESTAMP NOT NULL,
     upd_dt TIMESTAMP NOT NULL,
     del_flag BOOLEAN NOT NULL
@@ -48,6 +50,8 @@ COMMENT ON COLUMN realitky.cleaned.property_type.type_code_idnes IS 'kód typu n
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_mm IS 'kód typu nemovitosti pro mmreality.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_remax IS 'kód typu nemovitosti pro remax.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_sreality IS 'kód typu nemovitosti pro sreality.cz';
+COMMENT ON COLUMN realitky.cleaned.property_type.type_code_tide IS 'kód typu nemovitosti pro tide.cz';
+COMMENT ON COLUMN realitky.cleaned.property_type.type_code_ulovdomov IS 'kód typu nemovitosti pro ulovdomov.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.ins_dt IS 'Datum vložení záznamu';
 COMMENT ON COLUMN realitky.cleaned.property_type.upd_dt IS 'Datum poslední aktualizace záznamu';
 COMMENT ON COLUMN realitky.cleaned.property_type.del_flag IS 'Příznak smazání záznamu';

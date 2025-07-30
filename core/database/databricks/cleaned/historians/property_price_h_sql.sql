@@ -15,6 +15,7 @@ USING (
         price_per_sqm,
         currency_code,
         price_type,
+        price_detail,
         src_web,
         del_flag
     FROM realitky.cleaned.property_price src
@@ -31,6 +32,7 @@ USING (
         hist.price_per_sqm,
         hist.currency_code,
         hist.price_type,
+        hist.price_detail,
         hist.src_web,
         hist.del_flag
     FROM realitky.cleaned.property_price_h hist
@@ -50,6 +52,7 @@ WHEN MATCHED THEN UPDATE SET
     trg.price_per_sqm = src.price_per_sqm,
     trg.currency_code = src.currency_code,
     trg.price_type = src.price_type,
+    trg.price_detail = src.price_detail,
     trg.del_flag = src.del_flag,
     trg.upd_dt = current_timestamp(),
     trg.upd_process_id = :process_id
@@ -61,6 +64,7 @@ WHEN NOT MATCHED THEN INSERT (
     price_per_sqm,
     currency_code,
     price_type,
+    price_detail,
     src_web,
     del_flag,
     ins_dt,
@@ -78,6 +82,7 @@ WHEN NOT MATCHED THEN INSERT (
     src.price_per_sqm,
     src.currency_code,
     src.price_type,
+    src.price_detail,
     src.src_web,
     src.del_flag,
     current_timestamp(),
