@@ -2,14 +2,27 @@
 
 CREATE TABLE IF NOT EXISTS realitky.cleaned.property_gas (
     property_gas_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Unikátní identifikátor typu plynové přípojky
+    property_gas_key BIGINT NOT NULL, -- Klíč typu plynové přípojky pro referenční integritu
     
     gas_name STRING NOT NULL, -- Název typu plynové přípojky
-    gas_code STRING, -- Kód typu (např. ZEMNI, PROPAN, ZADNY)
-    description STRING, -- Popis typu plynové přípojky
-    gas_type STRING, -- Typ plynu (zemní, propan-butan, bioplyn)
-    connection_type STRING, -- Typ připojení (veřejná síť, nádrž, lahve)
+    desc STRING, -- Popis typu plynové přípojky
     safety_rating SMALLINT, -- Hodnocení bezpečnosti (1-5)
     cost_efficiency SMALLINT, -- Hodnocení nákladové efektivity (1-5)
+
+    gas_code STRING, -- Obecný kód typu plynové přípojky (např. ZEMNI, PROPAN, ZADNY)
+    gas_code_accordinvest STRING,
+    gas_code_bezrealitky STRING,
+    gas_code_bidli STRING,
+    gas_code_broker STRING,
+    gas_code_gaia STRING,
+    gas_code_century21 STRING,
+    gas_code_dreamhouse STRING,
+    gas_code_idnes STRING,
+    gas_code_mm STRING,
+    gas_code_remax STRING,
+    gas_code_sreality STRING,
+    gas_code_tide STRING,
+    gas_code_ulovdomov STRING,
     
     ins_dt TIMESTAMP NOT NULL, -- Datum vložení záznamu
     upd_dt TIMESTAMP NOT NULL, -- Datum poslední aktualizace záznamu
@@ -27,34 +40,28 @@ TBLPROPERTIES (
 COMMENT ON TABLE realitky.cleaned.property_gas IS 'Číselník typů plynových přípojek a zdrojů plynu pro nemovitosti.';
 
 COMMENT ON COLUMN realitky.cleaned.property_gas.property_gas_id IS 'Unikátní identifikátor typu plynové přípojky.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.property_gas_key IS 'Klíč typu plynové přípojky pro referenční integritu.';
+
 COMMENT ON COLUMN realitky.cleaned.property_gas.gas_name IS 'Název typu plynové přípojky.';
-COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code IS 'Kód typu (např. ZEMNI, PROPAN, ZADNY).';
-COMMENT ON COLUMN realitky.cleaned.property_gas.description IS 'Popis typu plynové přípojky.';
-COMMENT ON COLUMN realitky.cleaned.property_gas.gas_type IS 'Typ plynu.';
-COMMENT ON COLUMN realitky.cleaned.property_gas.connection_type IS 'Typ připojení.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.desc IS 'Popis typu plynové přípojky.';
 COMMENT ON COLUMN realitky.cleaned.property_gas.safety_rating IS 'Hodnocení bezpečnosti (1-5).';
 COMMENT ON COLUMN realitky.cleaned.property_gas.cost_efficiency IS 'Hodnocení nákladové efektivity (1-5).';
+
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code IS 'Kód typu (např. ZEMNI, PROPAN, ZADNY).';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_accordinvest IS 'Kód typu pro realitní web accordinvest.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_bezrealitky IS 'Kód typu pro realitní web bezrealitky.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_bidli IS 'Kód typu pro realitní web bidli.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_broker IS 'Kód typu pro realitní web broker-consulting.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_gaia IS 'Kód typu pro realitní web gaia.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_century21 IS 'Kód typu pro realitní web century21.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_dreamhouse IS 'Kód typu pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_idnes IS 'Kód typu pro realitní web reality.idnes.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_mm IS 'Kód typu pro realitní web mmreality.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_remax IS 'Kód typu pro realitní web remax.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_sreality IS 'Kód typu pro realitní web sreality.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_tide IS 'Kód typu pro realitní web tide.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_ulovdomov IS 'Kód typu pro realitní web ulovdomov.cz.';
+
 COMMENT ON COLUMN realitky.cleaned.property_gas.ins_dt IS 'Datum vložení záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_gas.upd_dt IS 'Datum poslední aktualizace záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_gas.del_flag IS 'Příznak smazání záznamu.';
-
--- Create optimized indexes using Z-ORDER clustering
-OPTIMIZE realitky.cleaned.property_gas ZORDER BY (gas_code, gas_type, del_flag);
-
--- Insert sample reference data
-INSERT INTO realitky.cleaned.property_gas 
-(gas_name, gas_code, description, gas_type, connection_type, safety_rating, cost_efficiency, ins_dt, upd_dt, del_flag)
-VALUES 
-('Nespecifikováno', 'NEURCENO', 'Typ plynové přípojky není specifikován', 'Neznámý', 'Neznámé', 0, 0, current_timestamp(), current_timestamp(), false),
-('Zemní plyn - veřejná síť', 'ZEMNI_SIT', 'Připojení k veřejné distribuční síti zemního plynu', 'Zemní plyn', 'Veřejná síť', 5, 4, current_timestamp(), current_timestamp(), false),
-('Zemní plyn - přípojka', 'ZEMNI_PRIPOJKA', 'Zemní plyn s vlastní přípojkou k distribuční síti', 'Zemní plyn', 'Vlastní přípojka', 5, 4, current_timestamp(), current_timestamp(), false),
-('Propan-butan - nádrž', 'PROPAN_NADRZ', 'Propan-butan z nadzemní nebo podzemní nádrže', 'Propan-butan', 'Nádrž', 4, 3, current_timestamp(), current_timestamp(), false),
-('Propan-butan - lahve', 'PROPAN_LAHVE', 'Propan-butan z výměnných lahví', 'Propan-butan', 'Lahve', 3, 2, current_timestamp(), current_timestamp(), false),
-('Bioplyn - vlastní výroba', 'BIOPLYN', 'Bioplyn z vlastní bioplynové stanice', 'Bioplyn', 'Vlastní výroba', 4, 5, current_timestamp(), current_timestamp(), false),
-('Stlačený zemní plyn (CNG)', 'CNG', 'Stlačený zemní plyn pro speciální použití', 'CNG', 'Tlakové nádoby', 4, 3, current_timestamp(), current_timestamp(), false),
-('Zkapalněný zemní plyn (LNG)', 'LNG', 'Zkapalněný zemní plyn pro větší spotřebiče', 'LNG', 'Kryogenní nádrž', 4, 4, current_timestamp(), current_timestamp(), false),
-('Bez plynu', 'ZADNY', 'Nemovitost bez plynové přípojky', 'Žádný', 'Bez připojení', 5, 5, current_timestamp(), current_timestamp(), false),
-('Připraveno pro plyn', 'PRIPRAVENO', 'Nemovitost připravena pro budoucí plynovou přípojku', 'Připraveno', 'Příprava', 5, 3, current_timestamp(), current_timestamp(), false);
-
--- Show inserted data
-SELECT * FROM realitky.cleaned.property_gas ORDER BY property_gas_id;

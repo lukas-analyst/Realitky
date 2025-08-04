@@ -1,10 +1,13 @@
 -- DROP TABLE IF EXISTS realitky.cleaned.property_subtype;
 
 CREATE TABLE IF NOT EXISTS realitky.cleaned.property_subtype (
-    property_subtype_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    property_subtype_key BIGINT NOT NULL,
-    subtype_name STRING NOT NULL,
-    desc STRING,
+    property_subtype_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Unikátní identifikátor podtypu nemovitosti
+    property_subtype_key BIGINT NOT NULL, -- Klíč podtypu nemovitosti pro referenční integritu
+
+    subtype_name STRING NOT NULL, -- Název podtypu nemovitosti (např. 2+kk byt, řadový dům, pole, kancelář)
+    desc STRING, -- Popis podtypu nemovitosti
+    
+    subtype_code STRING,
     subtype_code_accordinvest STRING,
     subtype_code_bezrealitky STRING,
     subtype_code_bidli STRING,
@@ -18,9 +21,10 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_subtype (
     subtype_code_sreality STRING,
     subtype_code_tide STRING,
     subtype_code_ulovdomov STRING,
-    ins_dt TIMESTAMP NOT NULL,
-    upd_dt TIMESTAMP NOT NULL,
-    del_flag BOOLEAN NOT NULL
+
+    ins_dt TIMESTAMP NOT NULL, -- Datum vložení záznamu
+    upd_dt TIMESTAMP NOT NULL, -- Datum poslední aktualizace záznamu
+    del_flag BOOLEAN NOT NULL -- Příznak smazání záznamu
 )
 USING DELTA
 TBLPROPERTIES (
@@ -37,8 +41,11 @@ COMMENT ON TABLE realitky.cleaned.property_subtype IS 'Podtypy nemovitostí, jak
 -- Column comments
 COMMENT ON COLUMN realitky.cleaned.property_subtype.property_subtype_id IS 'Unikátní identifikátor podtypu nemovitosti';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.property_subtype_key IS 'Klíč podtypu nemovitosti pro referenční integritu';
+
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_name IS 'Název podtypu nemovitosti (např. byt, dům, pozemek)';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.desc IS 'Popis podtypu nemovitosti';
+
+COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code IS 'Obecný kód podtypu nemovitosti';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_accordinvest IS 'Kód podtypu nemovitosti pro accordinvest';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_bezrealitky IS 'kód podtypu nemovitosti pro bezrealitky.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_bidli IS 'kód podtypu nemovitosti pro bidli.cz';
@@ -52,6 +59,7 @@ COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_remax IS 'kód 
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_sreality IS 'kód podtypu nemovitosti pro sreality.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_tide IS 'kód podtypu nemovitosti pro tide.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_ulovdomov IS 'kód podtypu nemovitosti pro ulovdomov.cz';
+
 COMMENT ON COLUMN realitky.cleaned.property_subtype.ins_dt IS 'Datum vložení záznamu';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.upd_dt IS 'Datum poslední aktualizace záznamu';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.del_flag IS 'Příznak smazání záznamu';

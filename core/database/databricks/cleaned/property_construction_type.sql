@@ -2,10 +2,25 @@
 
 CREATE TABLE IF NOT EXISTS realitky.cleaned.property_construction_type (
     property_construction_type_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Unikátní identifikátor typu konstrukce
-    
+    property_construction_type_key BIGINT NOT NULL, -- Klíč typu konstrukce pro referenční integritu
+
     construction_name STRING NOT NULL, -- Název typu konstrukce
-    construction_code STRING, -- Kód typu (např. PANEL, CIHLA, DREVO)
     desc STRING, -- Popis typu konstrukce
+
+    construction_code STRING, -- Obecný kód typu konstrukce (např. PANEL, CIHLA, DREVO)
+    construction_code_accordinvest STRING,
+    construction_code_bezrealitky STRING,
+    construction_code_bidli STRING,
+    construction_code_broker STRING,
+    construction_code_gaia STRING,
+    construction_code_century21 STRING,
+    construction_code_dreamhouse STRING,
+    construction_code_idnes STRING,
+    construction_code_mm STRING,
+    construction_code_remax STRING,
+    construction_code_sreality STRING,
+    construction_code_tide STRING,
+    construction_code_ulovdomov STRING,
     
     ins_dt TIMESTAMP NOT NULL, -- Datum vložení záznamu
     upd_dt TIMESTAMP NOT NULL, -- Datum poslední aktualizace záznamu
@@ -20,35 +35,31 @@ TBLPROPERTIES (
     'delta.logRetentionDuration' = 'interval 30 days'
 );
 
+-- Table comment
 COMMENT ON TABLE realitky.cleaned.property_construction_type IS 'Číselník typů konstrukce (panel, cihla, dřevo, smíšené).';
 
+-- Column comments
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.property_construction_type_id IS 'Unikátní identifikátor typu konstrukce.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.property_construction_type_key IS 'Klíč typu konstrukce pro referenční integritu.';
+
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_name IS 'Název typu konstrukce.';
-COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code IS 'Kód typu (např. PANEL, CIHLA, DREVO).';
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.desc IS 'Popis typu konstrukce.';
+
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code IS 'Kód typu (např. PANEL, CIHLA, DREVO).';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_accordinvest IS 'Kód typu konstrukce pro realitní web accordinvest.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_bezrealitky IS 'Kód typu konstrukce pro realitní web bezrealitky.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_bidli IS 'Kód typu konstrukce pro realitní web bidli.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_broker IS 'Kód typu konstrukce pro realitní web broker-consulting.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_gaia IS 'Kód typu konstrukce pro realitní web gaia.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_century21 IS 'Kód typu konstrukce pro realitní web century21.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_dreamhouse IS 'Kód typu konstrukce pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_idnes IS 'Kód typu konstrukce pro realitní web reality.idnes.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_mm IS 'Kód typu konstrukce pro realitní web mmreality.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_remax IS 'Kód typu konstrukce pro realitní web remax.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_sreality IS 'Kód typu konstrukce pro realitní web sreality.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_tide IS 'Kód typu konstrukce pro realitní web tide.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_ulovdomov IS 'Kód typu konstrukce pro realitní web ulovdomov.cz.';
+
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.ins_dt IS 'Datum vložení záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.upd_dt IS 'Datum poslední aktualizace záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.del_flag IS 'Příznak smazání záznamu.';
-
--- Create optimized indexes using Z-ORDER clustering
-OPTIMIZE realitky.cleaned.property_construction_type ZORDER BY (construction_code, del_flag);
-
--- Insert sample reference data
-INSERT INTO realitky.cleaned.property_construction_type 
-(construction_name, construction_code, desc, ins_dt, upd_dt, del_flag)
-VALUES 
-('Nespecifikováno', 'NEURCENO', 'Typ konstrukce není specifikován', current_timestamp(), current_timestamp(), false),
-('Panelová', 'PANEL', 'Panelová konstrukce typická pro bytové domy z 70.-80. let', current_timestamp(), current_timestamp(), false),
-('Cihlová', 'CIHLA', 'Klasická cihlová konstrukce s vysokou tepelnou akumulací', current_timestamp(), current_timestamp(), false),
-('Dřevěná', 'DREVO', 'Dřevěná konstrukce, včetně roubenek a dřevostaveb', current_timestamp(), current_timestamp(), false),
-('Železobetonová', 'ZELEZO_BETON', 'Železobetonová monolitická konstrukce', current_timestamp(), current_timestamp(), false),
-('Skeletová', 'SKELET', 'Skeletová konstrukce s výplní ze sendvičových panelů', current_timestamp(), current_timestamp(), false),
-('Smíšená', 'SMISENA', 'Kombinace více konstrukčních systémů', current_timestamp(), current_timestamp(), false),
-('Kamenná', 'KAMEN', 'Kamenná konstrukce, historické stavby', current_timestamp(), current_timestamp(), false),
-('Ocelová', 'OCEL', 'Ocelová konstrukce, typická pro průmyslové budovy', current_timestamp(), current_timestamp(), false),
-('Sendvičová', 'SENDVIC', 'Sendvičové panely s tepelnou izolací', current_timestamp(), current_timestamp(), false),
-('Nízkoenergetická', 'NIZKOENERGIE', 'Speciální konstrukce pro nízkoenergetické domy', current_timestamp(), current_timestamp(), false),
-('Pasivní dům', 'PASIVNI', 'Konstrukce pasivního domu s minimální energetickou náročností', current_timestamp(), current_timestamp(), false);
-
--- Show inserted data
-SELECT * FROM realitky.cleaned.property_construction_type ORDER BY property_construction_type_id;

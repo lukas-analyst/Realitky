@@ -2,11 +2,26 @@
 
 CREATE TABLE IF NOT EXISTS realitky.cleaned.property_accessibility (
     property_accessibility_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Unikátní identifikátor typu přístupové cesty
+    property_accessibility_key BIGINT NOT NULL, -- Klíč typu přístupové cesty pro referenční integritu
     
     accessibility_name STRING NOT NULL, -- Název typu přístupové cesty
-    accessibility_code STRING, -- Kód typu (např. ASFALT, DLAZBA, STERK)
     desc STRING, -- Popis typu přístupové cesty
-    
+
+    accessibility_code STRING, -- Obecný kód typu přístupové cesty 
+    accessibility_code_accordinvest STRING,
+    accessibility_code_bezrealitky STRING,
+    accessibility_code_bidli STRING,
+    accessibility_code_broker STRING,
+    accessibility_code_gaia STRING,
+    accessibility_code_century21 STRING,
+    accessibility_code_dreamhouse STRING,
+    accessibility_code_idnes STRING,
+    accessibility_code_mm STRING,
+    accessibility_code_remax STRING,
+    accessibility_code_sreality STRING,
+    accessibility_code_tide STRING,
+    accessibility_code_ulovdomov STRING,
+
     ins_dt TIMESTAMP NOT NULL, -- Datum vložení záznamu
     upd_dt TIMESTAMP NOT NULL, -- Datum poslední aktualizace záznamu
     del_flag BOOLEAN NOT NULL -- Příznak smazání záznamu
@@ -20,35 +35,31 @@ TBLPROPERTIES (
     'delta.logRetentionDuration' = 'interval 30 days'
 );
 
+-- Table comment
 COMMENT ON TABLE realitky.cleaned.property_accessibility IS 'Číselník typů přístupových cest k nemovitostem.';
 
+-- Column comments
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.property_accessibility_id IS 'Unikátní identifikátor typu přístupové cesty.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.property_accessibility_key IS 'Klíč typu přístupové cesty pro referenční integritu.';
+
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_name IS 'Název typu přístupové cesty.';
-COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code IS 'Kód typu (např. ASFALT, DLAZBA, STERK).';
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.desc IS 'Popis typu přístupové cesty.';
+
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code IS 'Kód typu přístupové cesty.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_accordinvest IS 'Kód typu přístupové cesty pro realitní web accordinvest.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_bezrealitky IS 'Kód typu přístupové cesty pro realitní web bezrealitky.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_bidli IS 'Kód typu přístupové cesty pro realitní web bidli.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_broker IS 'Kód typu přístupové cesty pro realitní web broker-consulting.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_gaia IS 'Kód typu přístupové cesty pro realitní web gaia.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_century21 IS 'Kód typu přístupové cesty pro realitní web century21.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_dreamhouse IS 'Kód typu přístupové cesty pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_idnes IS 'Kód typu přístupové cesty pro realitní web reality.idnes.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_mm IS 'Kód typu přístupové cesty pro realitní web mmreality.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_remax IS 'Kód typu přístupové cesty pro realitní web remax.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_sreality IS 'Kód typu přístupové cesty pro realitní web sreality.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_tide IS 'Kód typu přístupové cesty pro realitní web tide.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_ulovdomov IS 'Kód typu přístupové cesty pro realitní web ulovdomov.cz.';
+
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.ins_dt IS 'Datum vložení záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.upd_dt IS 'Datum poslední aktualizace záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.del_flag IS 'Příznak smazání záznamu.';
-
--- Create optimized indexes using Z-ORDER clustering
-OPTIMIZE realitky.cleaned.property_accessibility ZORDER BY (accessibility_code, del_flag);
-
--- Insert sample reference data
-INSERT INTO realitky.cleaned.property_accessibility 
-(accessibility_name, accessibility_code, desc, ins_dt, upd_dt, del_flag)
-VALUES 
-('Nespecifikováno', 'NEURCENO', 'Typ přístupové cesty není specifikován', current_timestamp(), current_timestamp(), false),
-('Asfaltová cesta', 'ASFALT', 'Přístupová cesta z asfaltu', current_timestamp(), current_timestamp(), false),
-('Betonová cesta', 'BETON', 'Přístupová cesta z betonu', current_timestamp(), current_timestamp(), false),
-('Dlážděná cesta', 'DLAZBA', 'Přístupová cesta z dlažby nebo dlažebních kostek', current_timestamp(), current_timestamp(), false),
-('Zámková dlažba', 'ZAMKOVA_DLAZBA', 'Přístupová cesta ze zámkové dlažby', current_timestamp(), current_timestamp(), false),
-('Štěrková cesta', 'STERK', 'Přístupová cesta ze štěrku', current_timestamp(), current_timestamp(), false),
-('Travnatá cesta', 'TRAVNIK', 'Přístupová cesta přes travnatý povrch', current_timestamp(), current_timestamp(), false),
-('Zemní cesta', 'ZEMNI', 'Nezpevněná zemní přístupová cesta', current_timestamp(), current_timestamp(), false),
-('Kamenná cesta', 'KAMEN', 'Přístupová cesta z přírodního kamene', current_timestamp(), current_timestamp(), false),
-('Dřevěná cesta', 'DREVO', 'Přístupová cesta z dřevěných prvků (prken, dlaždic)', current_timestamp(), current_timestamp(), false),
-('Smíšený povrch', 'SMISENY', 'Kombinace více typů povrchů přístupové cesty', current_timestamp(), current_timestamp(), false),
-('Bez přístupové cesty', 'ZADNA', 'Nemovitost bez zpevněné přístupové cesty', current_timestamp(), current_timestamp(), false);
-
--- Show inserted data
-SELECT * FROM realitky.cleaned.property_accessibility ORDER BY property_accessibility_id;

@@ -17,7 +17,7 @@ USING (
         price_type,
         price_detail,
         src_web,
-        del_flag
+        del_flag 
     FROM realitky.cleaned.property_price src
     WHERE src.upd_dt::date = :load_date
     AND (:src_web_filter IS NULL OR :src_web_filter = '' OR src.src_web = :src_web_filter)
