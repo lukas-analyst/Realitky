@@ -10,7 +10,10 @@ USING(
         listing_details_remax.listing_url,
         COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_remax.cena, '[^0-9]', '') AS INT), 0) AS price_amount,
         listing_details_remax.listing_url,
-        COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_remax.cena, '[^0-9]', '') AS INT), 0) / TRY_CAST(REGEXP_REPLACE(COALESCE(listing_details_remax.celkova_plocha, listing_details_remax.uzitna_plocha, '1'), '[^0-9]', '') AS DOUBLE) AS price_per_sqm,
+        ROUND(
+            COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_remax.cena, '[^0-9]', '') AS INT), 0) 
+            / TRY_CAST(REGEXP_REPLACE(COALESCE(listing_details_remax.celkova_plocha, listing_details_remax.uzitna_plocha, '1'), '[^0-9]', '') AS DOUBLE)
+        , 2) AS price_per_sqm,
         CASE
             WHEN UPPER(listing_details_remax.cena) LIKE '%EUR%' OR UPPER(listing_details_remax.cena) LIKE '%€%' THEN 'EUR'
             WHEN UPPER(listing_details_remax.cena) LIKE '%USD%' OR UPPER(listing_details_remax.cena) LIKE '%$%' THEN 'USD'

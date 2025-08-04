@@ -13,8 +13,11 @@ USING(
             ELSE COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_century21.price, '[^0-9]', '') AS INT), 0)
         END AS price_amount,
         CASE 
-            WHEN listing_details_century21.price like '%m²%' THEN COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_century21.price, '[^0-9]', '') AS INT), 0)
-            ELSE COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_century21.price, '[^0-9]', '') AS INT), 0) / COALESCE(REGEXP_REPLACE(listing_details_century21.plocha_uzitna, '[^0-9]', ''), REGEXP_REPLACE(listing_details_century21.plocha_pozemku, '[^0-9]', ''), 1)
+            WHEN listing_details_century21.price like '%m²%' THEN ROUND(COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_century21.price, '[^0-9]', '') AS INT), 0), 2)
+            ELSE ROUND(
+                COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_century21.price, '[^0-9]', '') AS INT), 0) 
+                / COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_century21.plocha_uzitna, '[^0-9]', '') AS INT), TRY_CAST(REGEXP_REPLACE(listing_details_century21.plocha_pozemku, '[^0-9]', '') AS INT), 1)
+            , 2)
         END AS price_per_sqm,
         CASE
             WHEN UPPER(listing_details_century21.price) LIKE '%EUR%' OR UPPER(listing_details_century21.price) LIKE '%€%' THEN 'EUR'

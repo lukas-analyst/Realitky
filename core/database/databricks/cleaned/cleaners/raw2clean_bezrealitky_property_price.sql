@@ -10,7 +10,16 @@ USING(
         listing_details_bezrealitky.listing_url,
         COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_bezrealitky.cena, '[^0-9]', '') AS INT), 0) AS price_amount,
         listing_details_bezrealitky.listing_url,
-        COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_bezrealitky.cena, '[^0-9]', '') AS INT), 0) / COALESCE(REGEXP_REPLACE(listing_details_bezrealitky.uzitna_plocha, '[^0-9]', ''), REGEXP_REPLACE(listing_details_bezrealitky.plocha_pozemku, '[^0-9]', ''), 1) AS price_per_sqm,
+        ROUND(
+            COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_bezrealitky.cena, '[^0-9]', '') AS INT), 0) 
+            / 
+            COALESCE(
+            TRY_CAST(REGEXP_REPLACE(listing_details_bezrealitky.uzitna_plocha, '[^0-9]', '') AS FLOAT),
+            TRY_CAST(REGEXP_REPLACE(listing_details_bezrealitky.plocha_pozemku, '[^0-9]', '') AS FLOAT),
+            1.0
+            ), 
+            2
+        ) AS price_per_sqm,
         CASE
             WHEN UPPER(listing_details_bezrealitky.cena) LIKE '%EUR%' OR UPPER(listing_details_bezrealitky.cena) LIKE '%€%' THEN 'EUR'
             WHEN UPPER(listing_details_bezrealitky.cena) LIKE '%USD%' OR UPPER(listing_details_bezrealitky.cena) LIKE '%$%' THEN 'USD'

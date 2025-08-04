@@ -8,15 +8,18 @@ USING(
         END AS property_mode,
         listing_url,
         COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_bidli.price, '[^0-9]', '') AS INT), 0) AS price_amount,
-        TRY_DIVIDE(
-            COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_bidli.price, '[^0-9]', '') AS INT), 0),
-            COALESCE(
-                TRY_CAST(REGEXP_EXTRACT(
-                    COALESCE(podlahova_plocha, uzitna_plocha, plocha), 
-                    '([0-9]+)', 1
-                ) AS DOUBLE), 
-                1
-            )
+        ROUND(
+            TRY_DIVIDE(
+                COALESCE(TRY_CAST(REGEXP_REPLACE(listing_details_bidli.price, '[^0-9]', '') AS INT), 0),
+                COALESCE(
+                    TRY_CAST(REGEXP_EXTRACT(
+                        COALESCE(podlahova_plocha, uzitna_plocha, plocha), 
+                        '([0-9]+)', 1
+                    ) AS DOUBLE), 
+                    1
+                )
+            ), 
+            2
         ) AS price_per_sqm,
         CASE
             WHEN UPPER(listing_details_bidli.price) LIKE '%EUR%' OR UPPER(listing_details_bidli.price) LIKE '%€%' THEN 'EUR'
