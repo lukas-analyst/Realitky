@@ -75,5 +75,14 @@ UPDATE realitky.cleaned.property_construction_type SET construction_code_remax =
 UPDATE realitky.cleaned.property_construction_type SET construction_code_remax = 'Kamenná' WHERE property_construction_type_key = 8;
 UPDATE realitky.cleaned.property_construction_type SET construction_code_remax = construction_code WHERE property_construction_type_key NOT IN (2, 3, 4, 6, 7, 8);
 
+-- Update ulovdomov codes
+UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'panelová' WHERE property_construction_type_key = 2;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'cihlová' WHERE property_construction_type_key = 3;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'dřevěná' WHERE property_construction_type_key = 4;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'skeletová' WHERE property_construction_type_key = 6;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'smíšená' WHERE property_construction_type_key = 7;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'kamenná' WHERE property_construction_type_key = 8;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'montovaná' WHERE property_construction_type_key = 11;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = construction_code WHERE property_construction_type_key NOT IN (2, 3, 4, 6, 7, 8, 11);
 
 SELECT * FROM realitky.cleaned.property_construction_type;

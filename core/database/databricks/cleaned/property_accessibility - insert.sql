@@ -61,4 +61,16 @@ UPDATE realitky.cleaned.property_accessibility SET accessibility_code_idnes = 'd
 UPDATE realitky.cleaned.property_accessibility SET accessibility_code_idnes = 'žádné úpravy' WHERE property_accessibility_key = 12;
 UPDATE realitky.cleaned.property_accessibility SET accessibility_code_idnes = accessibility_code WHERE property_accessibility_key NOT IN (2, 4, 12);
 
+-- Update remax codes (remax does not have specific codes)
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_remax = 'XNA';
+
+-- Update ulovdomov codes
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_ulovdomov = 'asfaltová' WHERE property_accessibility_key = 2;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_ulovdomov = 'betonová' WHERE property_accessibility_key = 3;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_ulovdomov = 'dlážděná' WHERE property_accessibility_key = 4;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_ulovdomov = 'zpevněná' WHERE property_accessibility_key = 5;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_ulovdomov = 'štěrková' WHERE property_accessibility_key = 6;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_ulovdomov = 'neupravená' WHERE property_accessibility_key = 12;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_ulovdomov = accessibility_code WHERE property_accessibility_key NOT IN (2, 3, 4, 5, 6, 12);
+
 SELECT * FROM realitky.cleaned.property_accessibility;

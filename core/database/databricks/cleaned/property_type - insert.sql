@@ -75,5 +75,10 @@ UPDATE realitky.cleaned.property_type SET type_code_remax = 'Hotely, penziony a 
 UPDATE realitky.cleaned.property_type SET type_code_remax = 'Komerční prostory' WHERE property_type_key = 14;
 UPDATE realitky.cleaned.property_type SET type_code_remax = type_code WHERE property_type_key NOT IN (1, 2, 3, 5, 7, 8, 10, 13, 14);
 
+-- Update ulovdomov codes
+UPDATE realitky.cleaned.property_type SET type_code_ulovdomov = 'byt' WHERE property_type_key = 1;
+UPDATE realitky.cleaned.property_type SET type_code_ulovdomov = 'dům' WHERE property_type_key = 2;
+UPDATE realitky.cleaned.property_type SET type_code_ulovdomov = 'jiné' WHERE property_type_key = 5;
+UPDATE realitky.cleaned.property_type SET type_code_ulovdomov = type_code WHERE property_type_key NOT IN (1, 2, 5);
 
 SELECT * FROM realitky.cleaned.property_type;

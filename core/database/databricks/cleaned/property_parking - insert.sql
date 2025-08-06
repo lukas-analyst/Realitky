@@ -64,4 +64,7 @@ UPDATE realitky.cleaned.property_parking SET parking_code_idnes = parking_code W
 -- Update remax parking codes (remax does not have specific codes)
 UPDATE realitky.cleaned.property_parking SET parking_code_remax = 'XNA';
 
+-- Update ulovdomov parking codes (ulovdomov does not have specific codes)
+UPDATE realitky.cleaned.property_parking SET parking_code_ulovdomov = 'XNA';
+
 SELECT * FROM realitky.cleaned.property_parking;

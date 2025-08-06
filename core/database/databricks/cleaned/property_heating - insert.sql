@@ -71,4 +71,13 @@ UPDATE realitky.cleaned.property_heating SET heating_code_remax = 'Ústřední -
 UPDATE realitky.cleaned.property_heating SET heating_code_remax = 'Lokální - tuhá paliva' WHERE property_heating_key = 11;
 UPDATE realitky.cleaned.property_heating SET heating_code_remax = heating_code WHERE property_heating_key NOT IN (2, 3, 10, 11);
 
+-- Update ulovdomov codes
+UPDATE realitky.cleaned.property_heating SET heating_code_ulovdomov = 'jiné' WHERE property_heating_key = 1;
+UPDATE realitky.cleaned.property_heating SET heating_code_ulovdomov = 'lokální plynové' WHERE property_heating_key = 2;
+UPDATE realitky.cleaned.property_heating SET heating_code_ulovdomov = 'ústřední plynové' WHERE property_heating_key = 3;
+UPDATE realitky.cleaned.property_heating SET heating_code_ulovdomov = 'ústřední elektrické' WHERE property_heating_key = 4;
+UPDATE realitky.cleaned.property_heating SET heating_code_ulovdomov = 'lokální elektrické' WHERE property_heating_key = 5;
+UPDATE realitky.cleaned.property_heating SET heating_code_ulovdomov = 'lokální tuhá paliva' WHERE property_heating_key = 11;
+UPDATE realitky.cleaned.property_heating SET heating_code_ulovdomov = LOWER(heating_name) WHERE property_heating_key NOT IN (1, 2, 3, 4, 5, 11);
+
 SELECT * FROM realitky.cleaned.property_heating;
