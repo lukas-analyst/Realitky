@@ -126,6 +126,7 @@ MERGE INTO realitky.cleaned.property AS target
     WHERE
       listing_details_ulovdomov.del_flag = false
       AND listing_details_ulovdomov.status = 'active'
+      AND listing_details_ulovdomov.property_name IS NOT NULL
   ) AS source
   ON target.property_id = source.property_id
     AND target.src_web = source.src_web
