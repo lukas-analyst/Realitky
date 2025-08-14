@@ -1,0 +1,28 @@
+Table property_poi {
+  property_poi_id bigint [pk, increment, note: 'Unikátní identifikátor POI záznamu']
+  poi_id string [not null, note: 'Unikátní identifikátor POI']
+  property_id varchar [not null, ref: > property.property_id, note: 'ID nemovitosti (FK na property)']
+  category_key string [not null, note: 'Klíč kategorie POI']
+  poi_name string [note: 'Název POI']
+  poi_url string [note: 'URL POI']
+  poi_address1 string [note: 'Adresa POI (řádek 1)']
+  poi_address2 string [note: 'Adresa POI (řádek 2)']
+  poi_latitude double [note: 'Zeměpisná šířka POI']
+  poi_longitude double [note: 'Zeměpisná délka POI']
+  poi_distance_m double [note: 'Vzdálenost POI od nemovitosti v metrech']
+  poi_distance_walk_m int [note: 'Vzdálenost POI od nemovitosti pěšky v metrech']
+  poi_distance_walk_min int [note: 'Vzdálenost POI od nemovitosti pěšky v minutách']
+  poi_distance_drive_m int [note: 'Vzdálenost POI od nemovitosti autem v metrech']
+  poi_distance_drive_min int [note: 'Vzdálenost POI od nemovitosti autem v minutách']
+  poi_distance_public_transport_m int [note: 'Vzdálenost POI od nemovitosti veřejnou dopravou v metrech']
+  poi_distance_public_transport_min int [note: 'Vzdálenost POI od nemovitosti veřejnou dopravou v minutách']
+  poi_attributes string [note: 'Atributy POI jako key-value map']
+  data_source string [note: 'Zdroj dat (OSM, Google Places, HERE, atd.)']
+  ins_dt timestamp [note: 'Datum vložení záznamu']
+  ins_process_id string [note: 'ID procesu, který záznam vložil']
+  upd_dt timestamp [note: 'Datum poslední aktualizace záznamu']
+  upd_process_id string [note: 'ID procesu, který záznam aktualizoval']
+  del_flag boolean [note: 'Příznak smazání záznamu (TRUE = smazáno, FALSE = aktivní)']
+
+  Note: 'POI (Points of Interest) spojené s nemovitostmi, včetně jejich atributů a vzdáleností.'
+}

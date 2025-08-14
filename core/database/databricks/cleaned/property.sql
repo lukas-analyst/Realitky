@@ -71,8 +71,10 @@ TBLPROPERTIES (
     'delta.checkpointRetentionDuration' = 'interval 30 days'
 );
 
+-- Table comments
 COMMENT ON TABLE realitky.cleaned.property IS 'Základní informace o nemovitostech. Hlavní tabulka obsahující všechny důležité údaje o nemovitostech včetně adres, charakteristik a vybavení.';
 
+-- Column comments
 COMMENT ON COLUMN realitky.cleaned.property.property_id IS 'Unikátní identifikátor nemovitosti (UUID).';
 COMMENT ON COLUMN realitky.cleaned.property.property_name IS 'Název nemovitosti (např. "Prodej bytu 2+kk v Praze").';
 COMMENT ON COLUMN realitky.cleaned.property.address_street IS 'Ulice.';
