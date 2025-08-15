@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import requests
 
-csv_path = r'C:\Data\random_sql_2025_08_14 (2).csv'
+csv_path = r'C:\Data\random_sql_2025_08_14 (4).csv'
 output_dir = r'C:\Data\images'
 
 os.makedirs(output_dir, exist_ok=True)
