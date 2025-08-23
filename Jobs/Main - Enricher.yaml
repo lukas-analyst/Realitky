@@ -1,0 +1,97 @@
+resources:
+  jobs:
+    Main_Enricher:
+      name: Main - Enricher
+      description: >-
+        Enrich properties with:
+
+        - POI (Points Of Interests) surrounding the property and their lcoation
+        with walk/drive distance/duration
+
+        - (https://api.geoapify.com/v2/places)
+
+        - (https://api.openrouteservice.org/v2/directions/)
+
+
+        - Hourly weather information (-2 days) 
+
+        - (https://archive-api.open-meteo.com/v1/archive)
+
+
+        - Quality of neigborhood surface and street quality 
+
+        - (https://climate-action.heigit.org)
+
+
+        - Image and Description categorization using ML
+
+
+        - Catastre informations about the property/land
+      schedule:
+        quartz_cron_expression: 15 30 6 * * ?
+        timezone_id: Europe/Belgrade
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: enricher_config
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Enrichers/enrich_config
+            source: WORKSPACE
+        - task_key: category_key
+          depends_on:
+            - task_key: enricher_config
+          for_each_task:
+            inputs: "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
+            concurrency: 4
+            task:
+              task_key: poi_places_geoapify
+              notebook_task:
+                notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+                  weekly/Core/Enrichers/poi_places
+                base_parameters:
+                  category_key: "{{input}}"
+                  process_id: "{{job.run_id}}"
+                  max_properties: "{{tasks.enricher_config.values.max_properties}}"
+                  api_key: 8bdf2e63c74747ec89d4a4b67f26f0cb
+                source: WORKSPACE
+        - task_key: direction_style
+          depends_on:
+            - task_key: category_key
+            - task_key: enricher_config
+          run_if: ALL_DONE
+          for_each_task:
+            inputs: '["driving-car","foot-walking"]'
+            concurrency: 4
+            task:
+              task_key: poi_directions_openrouteservice
+              notebook_task:
+                notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+                  weekly/Core/Enrichers/poi_directions
+                base_parameters:
+                  direction_style: "{{input}}"
+                  process_id: "{{job.run_id}}"
+                  max_properties: "{{tasks.enricher_config.values.max_properties}}"
+                  api_key: eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjM0ZWFhNmZmOWQxNjRiODI5OWY4OGU2NmNlOWZjZjFjIiwiaCI6Im11cm11cjY0In0=
+                source: WORKSPACE
+              max_retries: 2
+              min_retry_interval_millis: 5000
+              disable_auto_optimization: false
+        - task_key: update_property_stats_poi
+          depends_on:
+            - task_key: category_key
+            - task_key: enricher_config
+          run_if: ALL_DONE
+          sql_task:
+            parameters:
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: e0a04ad8-861c-4737-ad6a-a8c491dafcab
+            warehouse_id: 86eda5b32c506765
+          max_retries: 2
+          min_retry_interval_millis: 5000
+      queue:
+        enabled: true
+      parameters:
+        - name: test_mode
+          default: "false"
+      performance_target: PERFORMANCE_OPTIMIZED

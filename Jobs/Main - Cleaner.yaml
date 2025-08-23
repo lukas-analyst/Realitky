@@ -1,0 +1,175 @@
+resources:
+  jobs:
+    Main_Cleaner:
+      name: Main - Cleaner
+      schedule:
+        quartz_cron_expression: 50 10 6 * * ?
+        timezone_id: Europe/Belgrade
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: check_scrapers
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Cleaners/check_scrapers
+            base_parameters:
+              test_mode: "{{test_mode}}"
+            source: WORKSPACE
+        - task_key: clean_bezrealitky
+          depends_on:
+            - task_key: check_scrapers
+          run_job_task:
+            job_id: 989689307244920
+        - task_key: clean_bidli
+          depends_on:
+            - task_key: check_scrapers
+          run_job_task:
+            job_id: 1063537822658236
+        - task_key: clean_century21
+          depends_on:
+            - task_key: check_scrapers
+          run_job_task:
+            job_id: 296333273769396
+            job_parameters:
+              cleaner: century21
+        - task_key: clean_idnes
+          depends_on:
+            - task_key: check_scrapers
+          run_job_task:
+            job_id: 688196106429045
+        - task_key: clean_images
+          depends_on:
+            - task_key: check_scrapers
+          run_if: ALL_DONE
+          for_each_task:
+            inputs: '["bezrealitky","bidli","century21","idnes","remax","ulovdomov"]'
+            concurrency: 4
+            task:
+              task_key: clean_images_iteration
+              notebook_task:
+                notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+                  weekly/Core/Cleaners/raw2clean_images
+                base_parameters:
+                  cleaner: "{{input}}"
+                  process_id: "{{job.run_id}}"
+                source: WORKSPACE
+              max_retries: 2
+              min_retry_interval_millis: 5000
+              disable_auto_optimization: false
+        - task_key: clean_remax
+          depends_on:
+            - task_key: check_scrapers
+          run_job_task:
+            job_id: 943750895765271
+            job_parameters:
+              cleaner: remax
+        - task_key: clean_ulovdomov
+          depends_on:
+            - task_key: check_scrapers
+          run_job_task:
+            job_id: 95120021441106
+            job_parameters:
+              cleaner: ulovdomov
+        - task_key: reverse_geolocation
+          depends_on:
+            - task_key: clean_bidli
+            - task_key: clean_century21
+            - task_key: clean_bezrealitky
+            - task_key: clean_ulovdomov
+            - task_key: clean_remax
+            - task_key: clean_idnes
+          run_if: ALL_DONE
+          for_each_task:
+            inputs: '["bezrealitky","bidli","century21","idnes","remax","ulovdomov"]'
+            concurrency: 4
+            task:
+              task_key: reverse_geolocation_iteration
+              notebook_task:
+                notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+                  weekly/Core/Cleaners/reverse_geolocation
+                base_parameters:
+                  scrapers: "{{input}}"
+                  process_id: "{{job.run_id}}"
+                  maps_api: AIzaSyDdKYRM-8R2IWz5hI-h1bidEETLlBCj9lc
+                source: WORKSPACE
+        - task_key: historization_property
+          depends_on:
+            - task_key: reverse_geolocation
+          run_if: ALL_DONE
+          sql_task:
+            parameters:
+              load_date: "{{job.start_time.iso_date}}"
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: f7b2cdd8-3f48-4278-b235-bfc59fc6c08b
+            warehouse_id: 86eda5b32c506765
+        - task_key: historization_property_encloser
+          depends_on:
+            - task_key: historization_property
+          sql_task:
+            parameters:
+              load_date: "{{job.start_time.iso_date}}"
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: 399294c3-af03-4e31-98dc-e49312756a3d
+            warehouse_id: 86eda5b32c506765
+        - task_key: historization_property_price
+          depends_on:
+            - task_key: reverse_geolocation
+          run_if: ALL_DONE
+          sql_task:
+            parameters:
+              load_date: "{{job.start_time.iso_date}}"
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: 60996c54-88ca-44aa-9013-faa0c007d283
+            warehouse_id: 86eda5b32c506765
+        - task_key: historization_property_price_encloser
+          depends_on:
+            - task_key: historization_property_price
+          sql_task:
+            parameters:
+              load_date: "{{job.start_time.iso_date}}"
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: e6fd4e13-c0e9-4e12-ac98-d648d47b5070
+            warehouse_id: 86eda5b32c506765
+        - task_key: update_all_listings
+          depends_on:
+            - task_key: historization_property_encloser
+            - task_key: historization_property_price_encloser
+          for_each_task:
+            inputs: '["bezrealitky","bidli","century21","idnes","remax","ulovdomov"]'
+            concurrency: 4
+            task:
+              task_key: update_all_listings_iteration
+              run_if: ALL_DONE
+              notebook_task:
+                notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+                  weekly/Core/Cleaners/update_all_listings
+                base_parameters:
+                  src_web: "{{input}}"
+                  process_id: "{{job.run_id}}"
+                source: WORKSPACE
+        - task_key: update_property_stats_history
+          depends_on:
+            - task_key: historization_property_encloser
+            - task_key: historization_property_price_encloser
+          run_if: ALL_DONE
+          sql_task:
+            parameters:
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: 6d325f6d-f260-486b-be9d-f947ef8224b2
+            warehouse_id: 86eda5b32c506765
+        - task_key: update_property_stats_images
+          depends_on:
+            - task_key: clean_images
+          sql_task:
+            parameters:
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: 0e79020e-fda9-46d0-9ab1-1ce2d7608585
+            warehouse_id: 86eda5b32c506765
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED

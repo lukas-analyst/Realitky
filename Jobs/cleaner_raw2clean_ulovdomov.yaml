@@ -1,0 +1,53 @@
+resources:
+  jobs:
+    cleaner_raw2clean_ulovdomov:
+      name: cleaner_raw2clean_ulovdomov
+      tasks:
+        - task_key: property
+          sql_task:
+            parameters:
+              cleaner: "{{job.parameters.cleaner}}"
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: f18020ef-3204-4209-89cf-362dbe8bc890
+            warehouse_id: 86eda5b32c506765
+          max_retries: 2
+          min_retry_interval_millis: 5000
+        - task_key: property_inactive
+          depends_on:
+            - task_key: property
+          sql_task:
+            parameters:
+              cleaner: "{{job.parameters.cleaner}}"
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: 83662d45-0590-4773-b285-a4f61ef7cded
+            warehouse_id: 86eda5b32c506765
+        - task_key: property_price
+          sql_task:
+            parameters:
+              cleaner: "{{job.parameters.cleaner}}"
+              process_id: "{{job.run_id}}"
+            query:
+              query_id: 7ce021ee-92aa-4be7-b75b-2cd432c80c89
+            warehouse_id: 86eda5b32c506765
+          max_retries: 2
+          min_retry_interval_millis: 5000
+        - task_key: update_stats
+          depends_on:
+            - task_key: property_price
+            - task_key: property_inactive
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Cleaners/final_clean
+            base_parameters:
+              row_count: "{{tasks.property.output.rows}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+      queue:
+        enabled: true
+      parameters:
+        - name: cleaner
+          default: ulovdomov
+      performance_target: PERFORMANCE_OPTIMIZED

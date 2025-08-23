@@ -1,0 +1,43 @@
+resources:
+  jobs:
+    cleaner_raw2clean_bezrealitky:
+      name: cleaner_raw2clean_bezrealitky
+      tasks:
+        - task_key: property
+          sql_task:
+            parameters:
+              process_id: "{{job.run_id}}"
+              cleaner: "{{job.parameters.cleaner}}"
+            query:
+              query_id: ad79d9a0-0649-4e94-90e2-b502123694e3
+            warehouse_id: 86eda5b32c506765
+          max_retries: 2
+          min_retry_interval_millis: 5000
+        - task_key: property_price
+          sql_task:
+            parameters:
+              process_id: "{{job.run_id}}"
+              cleaner: "{{job.parameters.cleaner}}"
+            query:
+              query_id: 57990412-0748-4dc0-b3fe-8e6a752b78be
+            warehouse_id: 86eda5b32c506765
+          max_retries: 2
+          min_retry_interval_millis: 5000
+        - task_key: update_stats
+          depends_on:
+            - task_key: property
+            - task_key: property_price
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Cleaners/final_clean
+            base_parameters:
+              row_count: "{{tasks.property.output.rows}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+      queue:
+        enabled: true
+      parameters:
+        - name: cleaner
+          default: bezrealitky
+      performance_target: PERFORMANCE_OPTIMIZED

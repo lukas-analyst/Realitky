@@ -1,0 +1,393 @@
+resources:
+  jobs:
+    Main_Scraper:
+      name: Main - Scraper
+      schedule:
+        quartz_cron_expression: 41 19 3 * * ?
+        timezone_id: Europe/Belgrade
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: scraper_config
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Config files/Config Scraper
+            source: WORKSPACE
+        - task_key: stats_insert
+          depends_on:
+            - task_key: scraper_config
+          sql_task:
+            parameters:
+              scraper_sreality: "{{job.parameters.scraper_sreality}}"
+              scraper_bidli: "{{job.parameters.scraper_bidli}}"
+              process_id: "{{job.run_id}}"
+              scraper_century21: "{{job.parameters.scraper_century21}}"
+              scraper_bezrealitky: "{{job.parameters.scraper_bezrealitky}}"
+              scraper_ulovdomov: "{{job.parameters.scraper_ulovdomov}}"
+              scraper_idnes: "{{job.parameters.scraper_idnes}}"
+              scraper_remax: "{{job.parameters.scraper_remax}}"
+            query:
+              query_id: 061e8a78-cff9-42e7-b520-cf4bebed9899
+            warehouse_id: 86eda5b32c506765
+        - task_key: if_bezrealitky
+          depends_on:
+            - task_key: stats_insert
+          condition_task:
+            op: EQUAL_TO
+            left: "{{job.parameters.scraper_bezrealitky}}"
+            right: "True"
+        - task_key: bezrealitky_listings
+          depends_on:
+            - task_key: if_bezrealitky
+              outcome: "true"
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_bezrealitky_listings
+            base_parameters:
+              max_pages: "{{tasks.scraper_config.values.max_pages}}"
+              per_page: "{{tasks.scraper_config.values.per_page}}"
+              scraper_name: bezrealitky
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: new_listings_bezrealitky
+          depends_on:
+            - task_key: bezrealitky_listings
+          condition_task:
+            op: GREATER_THAN
+            left: "{{tasks.bezrealitky_listings.values.row_count}}"
+            right: "0"
+        - task_key: bezrealitky_details
+          depends_on:
+            - task_key: new_listings_bezrealitky
+              outcome: "true"
+            - task_key: stats_insert
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_bezrealitky_detail
+            base_parameters:
+              scraper_name: bezrealitky
+              weekly: "{{tasks.scraper_config.values.weekly}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: if_bidli
+          depends_on:
+            - task_key: stats_insert
+          condition_task:
+            op: EQUAL_TO
+            left: "{{job.parameters.scraper_bidli}}"
+            right: "True"
+        - task_key: bidli_listings
+          depends_on:
+            - task_key: if_bidli
+              outcome: "true"
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_bidli_listings
+            base_parameters:
+              max_pages: "{{tasks.scraper_config.values.max_pages}}"
+              per_page: "{{tasks.scraper_config.values.per_page}}"
+              scraper_name: bidli
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: new_listings_bidli
+          depends_on:
+            - task_key: bidli_listings
+          condition_task:
+            op: GREATER_THAN
+            left: "{{tasks.bidli_listings.values.row_count}}"
+            right: "0"
+        - task_key: bidli_details
+          depends_on:
+            - task_key: new_listings_bidli
+              outcome: "true"
+            - task_key: stats_insert
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_bidli_detail
+            base_parameters:
+              scraper_name: bidli
+              weekly: "{{tasks.scraper_config.values.weekly}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: if_century21
+          depends_on:
+            - task_key: stats_insert
+          condition_task:
+            op: EQUAL_TO
+            left: "{{job.parameters.scraper_century21}}"
+            right: "True"
+        - task_key: century21_listings
+          depends_on:
+            - task_key: if_century21
+              outcome: "true"
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_century21_listings
+            base_parameters:
+              max_pages: "{{tasks.scraper_config.values.max_pages}}"
+              per_page: "{{tasks.scraper_config.values.per_page}}"
+              scraper_name: century21
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: new_listings_century21
+          depends_on:
+            - task_key: century21_listings
+          condition_task:
+            op: GREATER_THAN
+            left: "{{tasks.century21_listings.values.row_count}}"
+            right: "0"
+        - task_key: century21_details
+          depends_on:
+            - task_key: new_listings_century21
+              outcome: "true"
+            - task_key: stats_insert
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_century21_detail
+            base_parameters:
+              scraper_name: century21
+              weekly: "{{tasks.scraper_config.values.weekly}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: if_idnes
+          depends_on:
+            - task_key: stats_insert
+          condition_task:
+            op: EQUAL_TO
+            left: "{{job.parameters.scraper_idnes}}"
+            right: "True"
+        - task_key: idnes_listings
+          depends_on:
+            - task_key: if_idnes
+              outcome: "true"
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_idnes_listings
+            base_parameters:
+              max_pages: "{{tasks.scraper_config.values.max_pages}}"
+              per_page: "{{tasks.scraper_config.values.per_page}}"
+              scraper_name: idnes
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: new_listings_idnes
+          depends_on:
+            - task_key: idnes_listings
+          condition_task:
+            op: GREATER_THAN
+            left: "{{tasks.idnes_listings.values.row_count}}"
+            right: "0"
+        - task_key: idnes_details
+          depends_on:
+            - task_key: new_listings_idnes
+              outcome: "true"
+            - task_key: stats_insert
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_idnes_detail
+            base_parameters:
+              scraper_name: idnes
+              weekly: "{{tasks.scraper_config.values.weekly}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: if_remax
+          depends_on:
+            - task_key: stats_insert
+          condition_task:
+            op: EQUAL_TO
+            left: "{{job.parameters.scraper_remax}}"
+            right: "True"
+        - task_key: remax_listings
+          depends_on:
+            - task_key: if_remax
+              outcome: "true"
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_remax_listings
+            base_parameters:
+              max_pages: "{{tasks.scraper_config.values.max_pages}}"
+              per_page: "{{tasks.scraper_config.values.per_page}}"
+              scraper_name: remax
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: new_listings_remax
+          depends_on:
+            - task_key: remax_listings
+          condition_task:
+            op: GREATER_THAN
+            left: "{{tasks.remax_listings.values.row_count}}"
+            right: "0"
+        - task_key: if_sreality
+          depends_on:
+            - task_key: stats_insert
+          condition_task:
+            op: EQUAL_TO
+            left: "{{job.parameters.scraper_sreality}}"
+            right: "True"
+        - task_key: sreality_listings
+          depends_on:
+            - task_key: if_sreality
+              outcome: "true"
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_sreality_listings
+            base_parameters:
+              max_pages: "{{tasks.scraper_config.values.max_pages}}"
+              per_page: "{{tasks.scraper_config.values.per_page}}"
+              scraper_name: sreality
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: new_listings_sreality
+          depends_on:
+            - task_key: sreality_listings
+          condition_task:
+            op: GREATER_THAN
+            left: "{{tasks.sreality_listings.values.row_count}}"
+            right: "0"
+        - task_key: if_ulovdomov
+          depends_on:
+            - task_key: stats_insert
+          condition_task:
+            op: EQUAL_TO
+            left: "{{job.parameters.scraper_ulovdomov}}"
+            right: "True"
+        - task_key: ulovdomov_listings
+          depends_on:
+            - task_key: if_ulovdomov
+              outcome: "true"
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_ulovdomov_listings
+            base_parameters:
+              max_pages: "{{tasks.scraper_config.values.max_pages}}"
+              per_page: "{{tasks.scraper_config.values.per_page}}"
+              scraper_name: ulovdomov
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: new_listings_ulovdomov
+          depends_on:
+            - task_key: ulovdomov_listings
+          condition_task:
+            op: GREATER_THAN
+            left: "{{tasks.ulovdomov_listings.values.row_count}}"
+            right: "0"
+        - task_key: remax_details
+          depends_on:
+            - task_key: new_listings_remax
+              outcome: "true"
+            - task_key: stats_insert
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_remax_detail
+            base_parameters:
+              scraper_name: remax
+              weekly: "{{tasks.scraper_config.values.weekly}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: sreality_details
+          depends_on:
+            - task_key: new_listings_sreality
+              outcome: "true"
+            - task_key: stats_insert
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_sreality_detail
+            base_parameters:
+              scraper_name: sreality
+              weekly: "{{tasks.scraper_config.values.weekly}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: ulovdomov_details
+          depends_on:
+            - task_key: stats_insert
+            - task_key: new_listings_ulovdomov
+              outcome: "true"
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_ulovdomov_detail
+            base_parameters:
+              scraper_name: ulovdomov
+              weekly: "{{tasks.scraper_config.values.weekly}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: insert_property_stats
+          depends_on:
+            - task_key: century21_details
+            - task_key: sreality_details
+            - task_key: ulovdomov_details
+            - task_key: bezrealitky_details
+            - task_key: bidli_details
+            - task_key: remax_details
+            - task_key: idnes_details
+          for_each_task:
+            inputs: '["bezrealitky","bidli","century21","idnes","remax","sreality","ulovdomov"]'
+            concurrency: 4
+            task:
+              task_key: insert_property_stats_iteration
+              run_if: ALL_DONE
+              notebook_task:
+                notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+                  weekly/Core/Scrapers/utils/insert_property_stats
+                base_parameters:
+                  scraper: "{{input}}"
+                  process_id: "{{job.run_id}}"
+                source: WORKSPACE
+              max_retries: 3
+              min_retry_interval_millis: 5000
+              disable_auto_optimization: false
+        - task_key: update_stats
+          depends_on:
+            - task_key: century21_details
+            - task_key: sreality_details
+            - task_key: ulovdomov_details
+            - task_key: bezrealitky_details
+            - task_key: bidli_details
+            - task_key: remax_details
+            - task_key: idnes_details
+          notebook_task:
+            notebook_path: /Workspace/Users/hanzliklukas2@gmail.com/Realitky - Scraper -
+              weekly/Core/Scrapers/scraper_update_stats
+            base_parameters:
+              row_count_bezrealitky: "{{tasks.bezrealitky_details.values.row_count}}"
+              row_count_bidli: "{{tasks.bidli_details.values.row_count}}"
+              row_count_century21: "{{tasks.century21_details.values.row_count}}"
+              row_count_idnes: "{{tasks.idnes_details.values.row_count}}"
+              row_count_remax: "{{tasks.remax_details.values.row_count}}"
+              row_count_sreality: "{{tasks.sreality_details.values.row_count}}"
+              row_count_ulovdomov: "{{tasks.ulovdomov_details.values.row_count}}"
+              process_id: "{{job.run_id}}"
+            source: WORKSPACE
+      queue:
+        enabled: true
+      parameters:
+        - name: scraper_bezrealitky
+          default: "True"
+        - name: scraper_bidli
+          default: "True"
+        - name: scraper_century21
+          default: "True"
+        - name: scraper_idnes
+          default: "True"
+        - name: scraper_remax
+          default: "True"
+        - name: scraper_sreality
+          default: "True"
+        - name: test_mode
+          default: "True"
+        - name: scraper_ulovdomov
+          default: "True"
+      environments:
+        - environment_key: scraper_env
+          spec:
+            client: "2"
+            dependencies:
+              - aiohttp>=3.8.0
+              - aiofiles>=22.1.0
+              - httpx>=0.24.0
+              - selectolax>=0.3.0
+      performance_target: PERFORMANCE_OPTIMIZED
