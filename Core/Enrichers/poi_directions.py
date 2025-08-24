@@ -13,11 +13,11 @@
 # COMMAND ----------
 
 # Configuration widgets
-dbutils.widgets.text("api_key", "your_geoapify_api_key", "Geoapify API Key")
+dbutils.widgets.text("api_key", "API_KEY", "Geoapify API Key")
 dbutils.widgets.text("direction_style", "foot-walking", "Direction Style")
-dbutils.widgets.text("process_id", "POI_002", "Process ID")
+dbutils.widgets.text("process_id", "manual", "Process ID")
 dbutils.widgets.text("max_properties", "2", "Number of Records")
-dbutils.widgets.dropdown("test_mode", "true", ["true", "false"], "Test Mode (limit to 50 records)")
+dbutils.widgets.dropdown("test_mode", "true", ["true", "false"], "Test Mode (limit to 5 records)")
 
 # Get widget values
 api_key = dbutils.widgets.get("api_key")

@@ -13,11 +13,11 @@
 # COMMAND ----------
 
 # Configuration widgets
-dbutils.widgets.text("api_key", "your_geoapify_api_key", "Geoapify API Key")
+dbutils.widgets.text("api_key", "API_KEY", "Geoapify API Key")
 dbutils.widgets.text("category_key", "1", "category_key")
-dbutils.widgets.text("process_id", "POI_001", "Process ID")
+dbutils.widgets.text("process_id", "manual", "Process ID")
 dbutils.widgets.text("max_properties", "2", "Number of Records")
-dbutils.widgets.dropdown("test_mode", "true", ["true", "false"], "Test Mode (limit to 50 records)")
+dbutils.widgets.dropdown("test_mode", "true", ["true", "false"], "Test Mode (limit to 5 records)")
 
 
 # Get widget values
@@ -50,7 +50,7 @@ print(f"- Number of properties: {max_properties}")
 # Get POI Category
 row = spark.sql(f"""
     SELECT 
-      category_code, 
+      category_code_geoapi, 
       max_results 
     FROM realitky.cleaned.poi_category 
     WHERE 
@@ -58,7 +58,7 @@ row = spark.sql(f"""
       AND del_flag = FALSE
 """).first()
 
-category_code = row['category_code']
+category_code = row['category_code_geoapi']
 max_results = row['max_results']
 
 print(f"Category: {category_code}")

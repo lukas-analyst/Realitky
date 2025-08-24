@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.poi_category (
     category_code STRING NOT NULL,
     category_name STRING NOT NULL,
     category_description STRING,
+    category_code_geoapi STRING,
+    category_code_google STRING,
+    category_code_mapy STRING,
     max_distance_m DOUBLE,
     max_results INT,
     priority INT,
@@ -31,6 +34,11 @@ COMMENT ON COLUMN realitky.cleaned.poi_category.category_key IS 'Klíč kategori
 COMMENT ON COLUMN realitky.cleaned.poi_category.category_code IS 'Kód kategorie POI (např. transport_bus, restaurant).';
 COMMENT ON COLUMN realitky.cleaned.poi_category.category_name IS 'Název kategorie POI (např. Autobusová zastávka, Restaurace).';
 COMMENT ON COLUMN realitky.cleaned.poi_category.category_description IS 'Popis kategorie POI (např. zastávka autobusu, restaurace s českou kuchyní).';
+
+COMMENT ON COLUMN realitky.cleaned.poi_category.category_code_geoapi IS 'Kód kategorie POI pro GeoAPI.';
+COMMENT ON COLUMN realitky.cleaned.poi_category.category_code_google IS 'Kód kategorie POI pro Google.';
+COMMENT ON COLUMN realitky.cleaned.poi_category.category_code_mapy IS 'Kód kategorie POI pro Mapy.com.';
+
 COMMENT ON COLUMN realitky.cleaned.poi_category.max_distance_m IS 'Maximální vzdálenost v metrech pro vyhledávání POI v této kategorii.';
 COMMENT ON COLUMN realitky.cleaned.poi_category.max_results IS 'Maximální počet výsledků pro vyhledávání v této kategorii.';
 COMMENT ON COLUMN realitky.cleaned.poi_category.priority IS 'Priorita kategorie pro řazení výsledků (nižší číslo = vyšší priorita).';
