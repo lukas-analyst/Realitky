@@ -27,7 +27,7 @@ USING (
         COALESCE(TRY_CAST(REGEXP_EXTRACT(COALESCE(listing_details_century21.plocha_uzitna, listing_details_century21.plocha_pozemku), '([0-9]+)', 1) AS DOUBLE), -1) AS area_total_sqm,
         COALESCE(REGEXP_REPLACE(LEFT(listing_details_century21.plocha_pozemku, LENGTH(listing_details_century21.plocha_pozemku) -3), '[^0-9]', '') :: DOUBLE, -1) AS area_land_sqm,
         -1 AS number_of_rooms,
-        COALESCE(listing_details_century21.rok_vystavby, -1) :: INT AS construction_year,
+        COALESCE(TRY_CAST(listing_details_century21.rok_vystavby AS SMALLINT), -1) AS construction_year,
         -1 AS last_reconstruction_year,
         COALESCE(LEFT(listing_details_century21.energeticka_narocnost, 1), 'X') AS energy_class_penb,
         COALESCE(listing_details_century21.stav_objektu, 'XNA') AS property_condition,
