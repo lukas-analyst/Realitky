@@ -95,6 +95,12 @@ class Scraper_details:
                         "div.pd-table__value",
                     )
                 )
+                 # Set status / inactivity is when we get an error 410 or the price contains 'pronajato'
+                price_value = details.get('Cena:')
+                if price_value and 'pronajato' in price_value.lower():
+                    details["status"] = "inactive"
+                else:
+                    details["status"] = "active"
 
             # Extract property additional details
             detail_container = parser.css_first("div.pd-detail-info")
@@ -112,9 +118,6 @@ class Scraper_details:
             map_element = parser.css_first("div#listingMap")
             if map_element:
                 details["GPS coordinates"] = str(map_element.attributes.get("data-gps"))
-
-            # Set status / inactivity is when we get an error 410
-            details["status"] = "active"
             
             # Generate hash
             hash_input = {k: v for k, v in details.items() if k not in ["listing_hash", "ins_dt"]}
