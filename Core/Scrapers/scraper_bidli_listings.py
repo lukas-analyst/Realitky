@@ -86,17 +86,43 @@ class Scraper_listings:
                     response = await client.get(url)
                     response.raise_for_status()
                     parser = HTMLParser(response.text)
-                
-                listing_container = parser.css("a.item")
-                print(f"Found {len(listing_container)} listings on page {page}")
+
+                # Scope to the listings container(s) first
+                containers = parser.css("div.nemlist")
+                anchors = []
+
+                if containers:
+                    for c in containers:
+                        # Primary: specific anchors within the container
+                        local_anchors = c.css("a.nemlist-item")
+                        # Fallback: any detail links within the container if class changes
+                        if not local_anchors:
+                            local_anchors = [
+                                a for a in c.css("a")
+                                if a.attributes.get("href", "").startswith("/chci-koupit/detail/")
+                            ]
+                        anchors.extend(local_anchors)
+                else:
+                    # Global fallback if the container is not found (structure change)
+                    anchors = parser.css("a.nemlist-item")
+                    if not anchors:
+                        anchors = parser.css('a[href^="/chci-koupit/detail/"]')
+
+                print(f"Found {len(anchors)} listings on page {page}")
 
                 # Save list of URLs and IDs
-                listing = [
-                    {"listing_id": a.attributes["href"].split("/")[-1], "listing_url": f"https://www.bidli.cz{a.attributes['href']}"}
-                    for listing in listing_container
-                    if (a := listing.css_first("a"))
-                ]
-                listings.extend(listing)
+                for a in anchors:
+                    href = a.attributes.get("href", "")
+                    if not href:
+                        continue
+                    # Keep only detail links
+                    if not href.startswith("/chci-koupit/detail/"):
+                        continue
+                    listing_id = href.rstrip("/").split("/")[-1]
+                    listings.append({
+                        "listing_id": listing_id,
+                        "listing_url": f"https://www.bidli.cz{href}",
+                    })
 
                 # Go to next page
                 next_page_btn = parser.css_first("a.next")
