@@ -4,6 +4,7 @@
 
 SELECT * FROM realitky.stats.scrapers ORDER BY date DESC, scraper_name;
 SELECT * FROM realitky.stats.property_stats ORDER BY upd_dt DESC;
+SELECT * FROM realitky.stats.listings ORDER BY date, src_web DESC;
 
 
 /* --- ! -------------------------------- ! --- */
