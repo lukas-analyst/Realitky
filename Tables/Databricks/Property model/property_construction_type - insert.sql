@@ -75,6 +75,13 @@ UPDATE realitky.cleaned.property_construction_type SET construction_code_remax =
 UPDATE realitky.cleaned.property_construction_type SET construction_code_remax = 'Kamenná' WHERE property_construction_type_key = 8;
 UPDATE realitky.cleaned.property_construction_type SET construction_code_remax = construction_code WHERE property_construction_type_key NOT IN (2, 3, 4, 6, 7, 8);
 
+-- Update sreality codes
+UPDATE realitky.cleaned.property_construction_type SET construction_code_sreality = 'dřevostavba' WHERE property_construction_type_key = 4;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_sreality = 'montovaná' WHERE property_construction_type_key = 5;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_sreality = 'modulární' WHERE property_construction_type_key = 10;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_sreality = LOWER(construction_code) WHERE property_construction_type_key NOT IN (4, 5, 10);
+
+
 -- Update ulovdomov codes
 UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'panelová' WHERE property_construction_type_key = 2;
 UPDATE realitky.cleaned.property_construction_type SET construction_code_ulovdomov = 'cihlová' WHERE property_construction_type_key = 3;

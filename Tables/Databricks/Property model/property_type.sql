@@ -12,9 +12,10 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_type (
     type_code_bezrealitky STRING,
     type_code_bidli STRING,
     type_code_broker STRING,
-    type_code_gaia STRING,
     type_code_century21 STRING,
     type_code_dreamhouse STRING,
+    type_code_gaia STRING,
+    typ_code_housevip STRING,
     type_code_idnes STRING,
     type_code_mm STRING,
     type_code_remax STRING,
@@ -50,9 +51,10 @@ COMMENT ON COLUMN realitky.cleaned.property_type.type_code_accordinvest IS 'Kód
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_bezrealitky IS 'Kód typu nemovitosti pro realitní web bezrealitky.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_bidli IS 'Kód typu nemovitosti pro realitní web bidli.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_broker IS 'Kód typu nemovitosti pro realitní web broker-consulting.cz';
-COMMENT ON COLUMN realitky.cleaned.property_type.type_code_gaia IS 'Kód typu nemovitosti pro realitní web gaia.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_century21 IS 'Kód typu nemovitosti pro realitní web century21.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_dreamhouse IS 'Kód typu nemovitosti pro realitní web dreamhome.cz';
+COMMENT ON COLUMN realitky.cleaned.property_type.type_code_gaia IS 'Kód typu nemovitosti pro realitní web gaia.cz';
+COMMENT ON COLUMN realitky.cleaned.property_type.typ_code_housevip IS 'Kód typu nemovitosti pro realitní web housevip.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_idnes IS 'Kód typu nemovitosti pro realitní web reality.idnes.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_mm IS 'Kód typu nemovitosti pro realitní web mmreality.cz';
 COMMENT ON COLUMN realitky.cleaned.property_type.type_code_remax IS 'Kód typu nemovitosti pro realitní web remax.cz';

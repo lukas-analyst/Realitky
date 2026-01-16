@@ -58,6 +58,12 @@ UPDATE realitky.cleaned.property_water_supply SET water_supply_code_idnes = wate
 -- Update remax codes
 UPDATE realitky.cleaned.property_water_supply SET water_supply_code_remax = water_supply_code;
 
+-- Update sreality codes
+UPDATE realitky.cleaned.property_water_supply SET water_supply_code_sreality = 'vodovod' WHERE property_water_supply_key = 2;
+UPDATE realitky.cleaned.property_water_supply SET water_supply_code_sreality = 'místní zdroj vody' WHERE property_water_supply_key = 3;
+UPDATE realitky.cleaned.property_water_supply SET water_supply_code_sreality = 'retenční nádrž na dešťovou vodu' WHERE property_water_supply_key = 5;
+UPDATE realitky.cleaned.property_water_supply SET water_supply_code_sreality = water_supply_code WHERE property_water_supply_key NOT IN (2, 3, 5);
+
 -- Update ulovdomov codes
 UPDATE realitky.cleaned.property_water_supply SET water_supply_code_ulovdomov = 'vodovod' WHERE property_water_supply_key = 2;
 UPDATE realitky.cleaned.property_water_supply SET water_supply_code_ulovdomov = 'studna' WHERE property_water_supply_key = 3;

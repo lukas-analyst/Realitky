@@ -12,9 +12,10 @@ INSERT INTO realitky.cleaned.property_type
     -- type_code_bezrealitky,
     -- type_code_bidli,
     -- type_code_broker,
-    -- type_code_gaia,
     -- type_code_century21,
     -- type_code_dreamhouse,
+    -- type_code_gaia,
+    -- typ_code_housevip,
     -- type_code_idnes,
     -- type_code_mm,
     -- type_code_remax,
@@ -40,7 +41,7 @@ VALUES
     (11,    'Obchodní prostor',   'Obchodní prostor je komerční prostor určený pro maloobchodní nebo velkoobchodní činnost.',                      'OBCHODNI_PROSTOR',     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     (12,    'Restaurace',         'Restaurace je podnik poskytující stravovací služby, obvykle s možností posezení.',                              'RESTAURACE',           CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     (13,    'Hotel',              'Hotel je ubytovací zařízení poskytující pokoje a další služby pro hosty.',                                      'HOTEL',                CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
-    (14,    'Komerční nemovitost','Komerční nemovitost zahrnuje budovy a pozemky určené pro podnikání, jako jsou kanceláře, obchody a sklady.',    'KOMERCNI_NEMOVITOST',  CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
+    (14,    'Komerční nemovitost','Zahrnuje různé druhy nemovitostí pro komerční účely, jež nejsou jmenované jinde.',                              'KOMERCNI_NEMOVITOST',  CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     (15,    'Rekreační objekt',   'Rekreační objekt je nemovitost určená pro rekreaci, jako jsou chaty, chalupy nebo rekreační domy.',             'REKREACNI_OBJEKT',     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
 
 -- Update bezrealitky codes
@@ -60,6 +61,21 @@ UPDATE realitky.cleaned.property_type SET type_code_century21 = 'komercni' WHERE
 UPDATE realitky.cleaned.property_type SET type_code_century21 = 'komplex' WHERE property_type_key = 15;
 UPDATE realitky.cleaned.property_type SET type_code_century21 = type_code WHERE property_type_key NOT IN (1, 2, 3, 4, 5, 10, 14, 15);
 
+-- Update housevip codes
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Byty' WHERE property_type_key = 1;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Rodinné domy' WHERE property_type_key = 2;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Pozemky pro bydlení' WHERE property_type_key = 3;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Kanceláře' WHERE property_type_key = 4;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Garáže' WHERE property_type_key = 5;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Sklady' WHERE property_type_key = 6;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Zemědělská půda' WHERE property_type_key = 8;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Výroba' WHERE property_type_key = 10;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Obchodní prostory' WHERE property_type_key = 11;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Restaurace' WHERE property_type_key = 12;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Ubytování' WHERE property_type_key = 13;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = 'Pozemky pro komerční výstavbu' WHERE property_type_key = 14;
+UPDATE realitky.cleaned.property_type SET typ_code_housevip = type_name WHERE property_type_key NOT IN (1, 2, 3, 4, 5, 6, 8, 10, 11, 12, 13, 14);
+
 -- Update idnes codes
 UPDATE realitky.cleaned.property_type SET type_code_idnes = type_code;
 
@@ -74,6 +90,10 @@ UPDATE realitky.cleaned.property_type SET type_code_remax = 'Historické objekty
 UPDATE realitky.cleaned.property_type SET type_code_remax = 'Hotely, penziony a restaurace' WHERE property_type_key = 13;
 UPDATE realitky.cleaned.property_type SET type_code_remax = 'Komerční prostory' WHERE property_type_key = 14;
 UPDATE realitky.cleaned.property_type SET type_code_remax = type_code WHERE property_type_key NOT IN (1, 2, 3, 5, 7, 8, 10, 13, 14);
+
+-- Update sreality codes
+UPDATE realitky.cleaned.property_type SET type_code_sreality = 'Komerční' WHERE property_type_key = 14;
+UPDATE realitky.cleaned.property_type SET type_code_sreality = LOWER(type_code) WHERE property_type_key NOT IN (14);
 
 -- Update ulovdomov codes
 UPDATE realitky.cleaned.property_type SET type_code_ulovdomov = 'byt' WHERE property_type_key = 1;

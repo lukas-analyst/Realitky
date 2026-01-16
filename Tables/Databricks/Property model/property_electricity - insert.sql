@@ -66,6 +66,10 @@ UPDATE realitky.cleaned.property_electricity SET electricity_code_remax = '230 V
 UPDATE realitky.cleaned.property_electricity SET electricity_code_remax = '400 V' WHERE property_electricity_key = 3;
 UPDATE realitky.cleaned.property_electricity SET electricity_code_remax = electricity_code WHERE property_electricity_key NOT IN (2, 3);
 
+-- Update sreality codes
+UPDATE realitky.cleaned.property_electricity SET electricity_code_sreality = 'bez přípojky' WHERE property_electricity_key = 7;
+UPDATE realitky.cleaned.property_electricity SET electricity_code_sreality = electricity_code WHERE property_electricity_key NOT IN (7);
+
 -- Update ulovdomov codes (ulovdomov does not have specific codes)
 UPDATE realitky.cleaned.property_electricity SET electricity_code_ulovdomov = 'XNA'
 
