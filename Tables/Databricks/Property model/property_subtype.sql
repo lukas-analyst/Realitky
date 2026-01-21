@@ -12,9 +12,10 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_subtype (
     subtype_code_bezrealitky STRING,
     subtype_code_bidli STRING,
     subtype_code_broker STRING,
-    subtype_code_gaia STRING,
     subtype_code_century21 STRING,
     subtype_code_dreamhouse STRING,
+    subtype_code_gaia STRING,
+    subtype_code_housevip STRING,
     subtype_code_idnes STRING,
     subtype_code_mm STRING,
     subtype_code_remax STRING,
@@ -50,9 +51,10 @@ COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_accordinvest IS
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_bezrealitky IS 'kód podtypu nemovitosti pro bezrealitky.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_bidli IS 'kód podtypu nemovitosti pro bidli.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_broker IS 'kód podtypu nemovitosti pro broker-consulting.cz';
-COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_gaia IS 'kód podtypu nemovitosti pro gaia.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_century21 IS 'kód podtypu nemovitosti pro century21.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_dreamhouse IS 'kód podtypu nemovitosti pro dreamhome.cz';
+COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_gaia IS 'kód podtypu nemovitosti pro gaia.cz';
+COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_housevip IS 'kód podtypu nemovitosti pro housevip.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_idnes IS 'kód podtypu nemovitosti pro reality.idnes.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_mm IS 'kód podtypu nemovitosti pro mmreality.cz';
 COMMENT ON COLUMN realitky.cleaned.property_subtype.subtype_code_remax IS 'kód podtypu nemovitosti pro remax.cz';

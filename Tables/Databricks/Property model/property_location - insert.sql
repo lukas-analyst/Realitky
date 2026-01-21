@@ -56,6 +56,17 @@ UPDATE realitky.cleaned.property_location SET location_code_bidli = 'XNA';
 -- Update century21 location codes (century21 does not have specific codes)
 UPDATE realitky.cleaned.property_location SET location_code_century21 = 'XNA';
 
+-- Update housevip location codes
+UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Centrum obce' WHERE property_location_key = 2;
+UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Okraj obce' WHERE property_location_key = 4;
+UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Klidná část obce' WHERE property_location_key = 5;
+UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Rušná část obce' WHERE property_location_key = 6;
+UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Polosamota' WHERE property_location_key = 9;
+UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Sídliště' WHERE property_location_key = 14;
+UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Venkovská' WHERE property_location_key = 15;
+UPDATE realitky.cleaned.property_location SET location_code_housevip = location_code WHERE property_location_key NOT IN (2, 4, 5, 6, 9, 14, 15);
+
+
 -- Update idnes location codes
 UPDATE realitky.cleaned.property_location SET location_code_idnes = 'centrum' WHERE property_location_key = 2;
 UPDATE realitky.cleaned.property_location SET location_code_idnes = 'předměstí' WHERE property_location_key = 4;
@@ -74,6 +85,16 @@ UPDATE realitky.cleaned.property_location SET location_code_remax = 'Polosamota'
 UPDATE realitky.cleaned.property_location SET location_code_remax = 'Sídliště' WHERE property_location_key = 14;
 UPDATE realitky.cleaned.property_location SET location_code_remax = 'Samota' WHERE property_location_key = 15;
 UPDATE realitky.cleaned.property_location SET location_code_remax = location_code WHERE property_location_key NOT IN (2, 4, 5, 6, 9, 14, 15);
+
+-- Update sreality location codes
+UPDATE realitky.cleaned.property_location SET location_code_sreality = 'centrum obce' WHERE property_location_key = 2;
+UPDATE realitky.cleaned.property_location SET location_code_sreality = 'okraj obce' WHERE property_location_key = 4;
+UPDATE realitky.cleaned.property_location SET location_code_sreality = 'klidná část obce' WHERE property_location_key = 5;
+UPDATE realitky.cleaned.property_location SET location_code_sreality = 'rušná část obce' WHERE property_location_key = 6;
+UPDATE realitky.cleaned.property_location SET location_code_sreality = 'polosamota' WHERE property_location_key = 9;
+UPDATE realitky.cleaned.property_location SET location_code_sreality = 'sídliště' WHERE property_location_key = 14;
+UPDATE realitky.cleaned.property_location SET location_code_sreality = 'samota' WHERE property_location_key = 15;
+UPDATE realitky.cleaned.property_location SET location_code_sreality = LOWER(location_code) WHERE property_location_key NOT IN (2, 4, 5, 6, 9, 14, 15);
 
 -- Update ulovdomov location codes
 UPDATE realitky.cleaned.property_location SET location_code_ulovdomov = 'centrum města' WHERE property_location_key = 2;

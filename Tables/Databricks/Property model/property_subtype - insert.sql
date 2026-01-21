@@ -15,6 +15,8 @@ INSERT INTO realitky.cleaned.property_subtype
     -- subtype_gaia,
     -- subtype_century21,
     -- subtype_dreamhouse,
+    -- subtype_gaia,
+    -- subtype_housevip,
     -- subtype_idnes,
     -- subtype_mm,
     -- subtype_remax,
@@ -93,6 +95,18 @@ UPDATE realitky.cleaned.property_subtype SET subtype_code_century21 = 'lesy' WHE
 UPDATE realitky.cleaned.property_subtype SET subtype_code_century21 = 'sklepy' WHERE property_subtype_key = 44;
 UPDATE realitky.cleaned.property_subtype SET subtype_code_century21 = LOWER(subtype_name) WHERE property_subtype_key NOT IN (12, 16, 17, 20, 21, 22, 26, 42, 43, 44);
 
+-- Update housevip codes
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'apartmány' WHERE property_subtype_key = 12;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'zemědělská půda' WHERE property_subtype_key = 15;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'kanceláře' WHERE property_subtype_key = 16;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'garáže' WHERE property_subtype_key = 17;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'sklady' WHERE property_subtype_key = 18;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'výroba' WHERE property_subtype_key = 21;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'obchodní prostory' WHERE property_subtype_key = 22;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'ubytování' WHERE property_subtype_key = 24;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = 'pozemky pro bydlení' WHERE property_subtype_key = 25;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_housevip = LOWER(subtype_name) WHERE property_subtype_key NOT IN (12, 15, 16, 17, 18, 21, 22, 24, 25);
+
 -- Update idnes codes
 UPDATE realitky.cleaned.property_subtype SET subtype_code_idnes = subtype_code;
 
@@ -105,6 +119,10 @@ UPDATE realitky.cleaned.property_subtype SET subtype_code_remax = 'Pro komerčn�
 UPDATE realitky.cleaned.property_subtype SET subtype_code_remax = 'Trvalý travní porost' WHERE property_subtype_key = 42;
 UPDATE realitky.cleaned.property_subtype SET subtype_code_remax = 'Les' WHERE property_subtype_key = 43;
 UPDATE realitky.cleaned.property_subtype SET subtype_code_remax = LOWER(subtype_code) WHERE property_subtype_key NOT IN (1, 14, 15, 20, 22, 42, 43);
+
+-- Update sreality codes
+UPDATE realitky.cleaned.property_subtype SET subtype_code_sreality = 'Rodinný' WHERE property_subtype_key = 14;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_sreality = LOWER(subtype_code) WHERE property_subtype_key NOT IN (14);
 
 -- Update ulovdomov codes
 UPDATE realitky.cleaned.property_subtype SET subtype_code_ulovdomov = 'rodinný dům' WHERE property_subtype_key = 14;

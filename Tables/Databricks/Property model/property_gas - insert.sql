@@ -65,6 +65,11 @@ UPDATE realitky.cleaned.property_gas SET gas_code_remax = 'Individuální' WHERE
 UPDATE realitky.cleaned.property_gas SET gas_code_remax = 'Plynovod' WHERE property_gas_key = 2;
 UPDATE realitky.cleaned.property_gas SET gas_code_remax = gas_code WHERE property_gas_key NOT IN (2, 4);
 
+-- Update sreality codes
+UPDATE realitky.cleaned.property_gas SET gas_code_sreality = 'individuální' WHERE property_gas_key = 4;
+UPDATE realitky.cleaned.property_gas SET gas_code_sreality = 'plynovod' WHERE property_gas_key = 2;
+UPDATE realitky.cleaned.property_gas SET gas_code_sreality = gas_code WHERE property_gas_key NOT IN (2, 4);
+
 -- Update ulovdomov codes
 UPDATE realitky.cleaned.property_gas SET gas_code_ulovdomov = 'plynovod' WHERE property_gas_key = 2;
 UPDATE realitky.cleaned.property_gas SET gas_code_ulovdomov = 'individuální' WHERE property_gas_key = 4;

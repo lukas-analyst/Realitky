@@ -1,6 +1,6 @@
 MERGE INTO realitky.cleaned.property AS target
 USING (
-    SELECT
+    SELECT DISTINCT
         listing_details_century21.listing_id AS property_id,
         COALESCE(listing_details_century21.property_name, 'XNA') AS property_name,
         -- address is handled using reverse geolocation --

@@ -26,3 +26,41 @@ UlovDomov
 - Sreality
 - UlovDomov
 - BezRealitky
+
+
+Project Name: Realitky - Property Data Model
+
+Description: This Databricks data model focuses on storing and managing comprehensive information about real estate properties. It's designed for analytical purposes, providing a historical record of property details and facilitating data-driven insights.
+
+Data Entities:
+
+1.  **Property (property_h - historical table):** Core entity representing a real estate property. Includes details like address, type (house, apartment, land), size, construction year, condition, and location.  Historical tracking is implemented using a Type 2 Slowly Changing Dimension (SCD) approach.
+2.  **Property Type (property_type):** Categorizes properties (e.g., apartment, house, commercial).
+3.  **Property Subtype (property_subtype):**  Further refines property categorization (e.g., 2+kk apartment, detached house).
+4.  **Property Location (property_location):** Defines the location characteristics of a property (e.g., city center, quiet area).
+5.  **Property Construction Type (property_construction_type):** Specifies the building materials and construction method (e.g., brick, panel, wood).
+6.  **Property Accessibility (property_accessibility):** Describes how accessible the property is (e.g., asphalt road, dirt road, no access).
+7.  **Property Parking (property_parking):** Details parking options available with the property.
+8.  **Property Heating (property_heating):**  Information about the heating system used in the property.
+9.  **Property Electricity (property_electricity):** Details about the electrical connection and capacity.
+10. **Property Water Supply (property_water_supply):** Information about the water source and connection.
+11. **Property Gas (property_gas):** Details about the gas connection.
+12. **Property Price (property_price_h - historical table):** Stores price information for properties, including historical price changes.
+13. **Property Images (property_images):** Stores links to images of the property.
+14. **Property Risk Score (property_risk_score):** Calculates and stores a risk score for each property based on various factors.
+15. **Property POI (property_poi):** Stores information about points of interest (POIs) near the property.
+
+Key Features:
+
+*   **Dimensional Modeling:** The model is structured around dimensions (e.g., property type, location) and facts (e.g., price, risk score).
+*   **Historical Tracking:**  Key entities (Property, Price) use a Type 2 SCD to maintain a complete history of changes.
+*   **Data Quality:** Includes codes for integration with various real estate websites.
+*   **Partitioning:** Tables are partitioned for improved query performance (e.g., by source website).
+
+Potential Use Cases:
+
+*   Real estate market analysis
+*   Property valuation
+*   Risk assessment
+*   Identifying investment opportunities
+*   Reporting and dashboards
