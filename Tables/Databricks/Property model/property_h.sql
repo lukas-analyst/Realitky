@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_h (
     address_house_number STRING NOT NULL, -- Číslo popisné/číslo orientační
     ruian_code STRING NOT NULL, -- Kód RÚIAN (pro propojení s demografickými daty ČSÚ)
     address_city STRING NOT NULL, -- Město/obec
-    address_state STRING NOT NULL, -- Kraj/stát
+    address_state STRING NOT NULL, -- Kraj
+    address_country_code STRING NOT NULL, -- Stát (kód)
     address_postal_code STRING NOT NULL, -- PSČ
     address_district_code STRING, -- Kód městské části/okresu (pro propojení s demografickými daty ČSÚ)
     address_latitude DECIMAL(9,6) NOT NULL, -- Zeměpisná šířka
@@ -84,7 +85,8 @@ COMMENT ON COLUMN realitky.cleaned.property_h.address_street IS 'Ulice.';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_house_number IS 'Číslo popisné/číslo orientační.';
 COMMENT ON COLUMN realitky.cleaned.property_h.ruian_code IS 'Kód RÚIAN (pro propojení s demografickými daty ČSÚ).';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_city IS 'Město/obec.';
-COMMENT ON COLUMN realitky.cleaned.property_h.address_state IS 'Kraj/stát.';
+COMMENT ON COLUMN realitky.cleaned.property_h.address_state IS 'Kraj.';
+COMMENT ON COLUMN realitky.cleaned.property_h.address_country_code IS 'Stát (kód).';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_postal_code IS 'PSČ.';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_district_code IS 'Kód městské části/okresu (pro propojení s demografickými daty ČSÚ).';
 COMMENT ON COLUMN realitky.cleaned.property_h.address_latitude IS 'Zeměpisná šířka.';
