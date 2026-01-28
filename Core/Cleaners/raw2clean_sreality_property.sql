@@ -173,6 +173,7 @@ MERGE INTO realitky.cleaned.property AS target
     WHERE
       listing_details_sreality.del_flag = false
       AND listing_details_sreality.status = 'active'
+      AND listing_details_sreality.listing_id NOT IN ('2634167116')
 
   ) AS source
   ON target.property_id = source.property_id
