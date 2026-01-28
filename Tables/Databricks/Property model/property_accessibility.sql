@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_accessibility (
     accessibility_code_gaia STRING,
     accessibility_code_century21 STRING,
     accessibility_code_dreamhouse STRING,
+    accessibility_code_housevip STRING,
     accessibility_code_idnes STRING,
     accessibility_code_mm STRING,
     accessibility_code_remax STRING,
@@ -53,6 +54,7 @@ COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_bro
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_gaia IS 'Kód typu přístupové cesty pro realitní web gaia.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_century21 IS 'Kód typu přístupové cesty pro realitní web century21.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_dreamhouse IS 'Kód typu přístupové cesty pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_housevip IS 'Kód typu přístupové cesty pro realitní web housevip.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_idnes IS 'Kód typu přístupové cesty pro realitní web reality.idnes.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_mm IS 'Kód typu přístupové cesty pro realitní web mmreality.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_accessibility.accessibility_code_remax IS 'Kód typu přístupové cesty pro realitní web remax.cz.';

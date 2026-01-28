@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_heating (
     heating_code_gaia STRING,
     heating_code_century21 STRING,
     heating_code_dreamhouse STRING,
+    heating_code_housevip STRING,
     heating_code_idnes STRING,
     heating_code_mm STRING,
     heating_code_remax STRING,
@@ -59,6 +60,7 @@ COMMENT ON COLUMN realitky.cleaned.property_heating.heating_code_broker IS 'Kód
 COMMENT ON COLUMN realitky.cleaned.property_heating.heating_code_gaia IS 'Kód typu vytápění pro realitní web gaia.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_heating.heating_code_century21 IS 'Kód typu vytápění pro realitní web century21.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_heating.heating_code_dreamhouse IS 'Kód typu vytápění pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_heating.heating_code_housevip IS 'Kód typu vytápění pro realitní web housevip.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_heating.heating_code_idnes IS 'Kód typu vytápění pro realitní web reality.idnes.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_heating.heating_code_mm IS 'Kód typu vytápění pro realitní web mmreality.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_heating.heating_code_remax IS 'Kód typu vytápění pro realitní web remax.cz.';

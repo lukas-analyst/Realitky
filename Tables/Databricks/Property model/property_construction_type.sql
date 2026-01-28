@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_construction_type (
     construction_code_gaia STRING,
     construction_code_century21 STRING,
     construction_code_dreamhouse STRING,
+    construction_code_housevip STRING,
     construction_code_idnes STRING,
     construction_code_mm STRING,
     construction_code_remax STRING,
@@ -53,6 +54,7 @@ COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_gaia IS 'Kód typu konstrukce pro realitní web gaia.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_century21 IS 'Kód typu konstrukce pro realitní web century21.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_dreamhouse IS 'Kód typu konstrukce pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_housevip IS 'Kód typu konstrukce pro realitní web housevip.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_idnes IS 'Kód typu konstrukce pro realitní web reality.idnes.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_mm IS 'Kód typu konstrukce pro realitní web mmreality.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_construction_type.construction_code_remax IS 'Kód typu konstrukce pro realitní web remax.cz.';

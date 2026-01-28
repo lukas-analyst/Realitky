@@ -17,6 +17,7 @@ INSERT INTO realitky.cleaned.property_gas
     -- gas_code_gaia,
     -- gas_code_century21,
     -- gas_code_dreamhouse,
+    -- gas_code_housevip,
     -- gas_code_idnes,
     -- gas_code_mm,
     -- gas_code_remax,
@@ -55,6 +56,10 @@ UPDATE realitky.cleaned.property_gas SET gas_code_century21 = 'Ano' WHERE proper
 UPDATE realitky.cleaned.property_gas SET gas_code_century21 = 'Jiný' WHERE property_gas_key = 4;
 UPDATE realitky.cleaned.property_gas SET gas_code_century21 = 'Není' WHERE property_gas_key = 9;
 UPDATE realitky.cleaned.property_gas SET gas_code_century21 = gas_code WHERE property_gas_key NOT IN (1, 2, 4, 9);
+
+-- Update housevip codes
+UPDATE realitky.cleaned.property_gas SET gas_code_housevip = 'Plynovod' WHERE property_gas_key = 2;
+UPDATE realitky.cleaned.property_gas SET gas_code_housevip = gas_name WHERE property_gas_key NOT IN (2);
 
 -- Update idnes codes
 UPDATE realitky.cleaned.property_gas SET gas_code_idnes = 'nádrž' WHERE property_gas_key = 4;

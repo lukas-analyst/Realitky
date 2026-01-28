@@ -57,6 +57,9 @@ UPDATE realitky.cleaned.property_construction_type SET construction_code_century
 UPDATE realitky.cleaned.property_construction_type SET construction_code_century21 = 'PREFABRICATED' WHERE property_construction_type_key = 10;
 UPDATE realitky.cleaned.property_construction_type SET construction_code_century21 = construction_code WHERE property_construction_type_key NOT IN (4, 10);
 
+-- Update housevip codes
+UPDATE realitky.cleaned.property_construction_type SET construction_code_housevip = construction_name;
+
 -- Update idnes codes
 UPDATE realitky.cleaned.property_construction_type SET construction_code_idnes = 'panelová' WHERE property_construction_type_key = 2;
 UPDATE realitky.cleaned.property_construction_type SET construction_code_idnes = 'cihlová' WHERE property_construction_type_key = 3;

@@ -14,6 +14,7 @@ INSERT INTO realitky.cleaned.property_location
     -- location_code_gaia,
     -- location_code_century21,
     -- location_code_dreamhouse,
+    -- location_code_housevip,
     -- location_code_idnes,
     -- location_code_mm,
     -- location_code_remax,
@@ -64,7 +65,7 @@ UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Rušná 
 UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Polosamota' WHERE property_location_key = 9;
 UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Sídliště' WHERE property_location_key = 14;
 UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Venkovská' WHERE property_location_key = 15;
-UPDATE realitky.cleaned.property_location SET location_code_housevip = location_code WHERE property_location_key NOT IN (2, 4, 5, 6, 9, 14, 15);
+UPDATE realitky.cleaned.property_location SET location_code_housevip = location_name WHERE property_location_key NOT IN (2, 4, 5, 6, 9, 14, 15);
 
 
 -- Update idnes location codes
