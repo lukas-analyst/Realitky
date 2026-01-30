@@ -50,6 +50,13 @@ UPDATE realitky.cleaned.property_type SET type_code_bezrealitky = type_name;
 -- Update bidli codes
 UPDATE realitky.cleaned.property_type SET type_code_bidli = type_code;
 
+-- Update broker codes
+UPDATE realitky.cleaned.property_type SET type_code_broker = 'byty' WHERE property_type_key = 1;
+UPDATE realitky.cleaned.property_type SET type_code_broker = 'domy' WHERE property_type_key = 2;
+UPDATE realitky.cleaned.property_type SET type_code_broker = 'pozemky' WHERE property_type_key = 3;
+UPDATE realitky.cleaned.property_type SET type_code_broker = 'komerční' WHERE property_type_key = 14;
+UPDATE realitky.cleaned.property_type SET type_code_broker = LOWER(type_name) WHERE property_type_key NOT IN (1, 2, 3, 14);
+
 -- Update century21 codes
 UPDATE realitky.cleaned.property_type SET type_code_century21 = 'byty' WHERE property_type_key = 1;
 UPDATE realitky.cleaned.property_type SET type_code_century21 = 'domy' WHERE property_type_key = 2;

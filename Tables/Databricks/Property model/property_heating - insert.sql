@@ -54,6 +54,15 @@ UPDATE realitky.cleaned.property_heating SET heating_code_bezrealitky = heating_
 -- Update bidli codes
 UPDATE realitky.cleaned.property_heating SET heating_code_bidli = 'XNA';
 
+-- Update broker codes
+UPDATE realitky.cleaned.property_heating SET heating_code_broker = 'lokální elektrické' WHERE property_heating_key = 5;
+UPDATE realitky.cleaned.property_heating SET heating_code_broker = 'lokální plynové' WHERE property_heating_key = 3;
+UPDATE realitky.cleaned.property_heating SET heating_code_broker = 'tuhá paliva' WHERE property_heating_key = 11;
+UPDATE realitky.cleaned.property_heating SET heating_code_broker = 'ústřední dálkové' WHERE property_heating_key = 10;
+UPDATE realitky.cleaned.property_heating SET heating_code_broker = 'ústřední elektrické' WHERE property_heating_key = 4;
+UPDATE realitky.cleaned.property_heating SET heating_code_broker = 'ústřední plynové' WHERE property_heating_key = 2;
+UPDATE realitky.cleaned.property_heating SET heating_code_broker = LOWER(heating_name) WHERE property_heating_key NOT IN (2, 3, 4, 5, 10, 11);
+
 -- Update century21 codes
 UPDATE realitky.cleaned.property_heating SET heating_code_century21 = 'Tepelné čerpadlo' WHERE property_heating_key = 8;
 UPDATE realitky.cleaned.property_heating SET heating_code_century21 = heating_code WHERE property_heating_key NOT IN (8);

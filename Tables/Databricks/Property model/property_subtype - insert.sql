@@ -72,7 +72,11 @@ VALUES
     (41,    'Studio',              'Studio je malý obytný prostor, obvykle s jedním otevřeným prostorem, který kombinuje obývací pokoj, ložnici a kuchyň.',        'STUDIO',           CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     (42,    'Louka',               'Louka je otevřený prostor pokrytý trávou a jinými rostlinami, obvykle využívaný pro pastvu nebo jako přírodní biotop.',        'LOUKA',            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
     (43,    'Les',                 'Lesy jsou rozsáhlé oblasti pokryté stromy a dalšími rostlinami, které slouží jako přírodní habitat pro různé druhy živočichů.','LESY',             CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
-    (44,    'Sklep',               'Sklep je podzemní prostor, obvykle pod budovou, určený pro skladování nebo jako obytný prostor.',                              'SKLEP',            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
+    (44,    'Sklep',               'Sklep je podzemní prostor, obvykle pod budovou, určený pro skladování nebo jako obytný prostor.',                              'SKLEP',            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
+    (45,    'Rybník',              'Rybník je uměle vytvořená nebo přirozená vodní plocha určená k chovu ryb nebo jako krajinný prvek.',                           'RYBNIK',           CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
+    (46,    'Pokoj',               'Pokoj je samostatná místnost určená k bydlení nebo práci.',                                                                    'POKOJ',            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
+    (47,    'Ordinace',            'Ordinace je prostor určený pro lékařskou praxi nebo jiné zdravotnické služby.',                                                'ORDINACE',         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE),
+    (48,    'Zemědělská usedlost', 'Zemědělská usedlost je komplex budov a pozemků určených pro zemědělskou výrobu a chov zvířat.',                                'ZEMEDELSKA USEDLOST',CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
 
 
 -- Update bezrealitky codes
@@ -81,6 +85,17 @@ UPDATE realitky.cleaned.property_subtype SET subtype_code_bezrealitky = subtype_
 
 -- Update bidli codes
 UPDATE realitky.cleaned.property_subtype SET subtype_code_bidli = subtype_code;
+
+-- Update broker codes
+UPDATE realitky.cleaned.property_subtype SET subtype_code_broker = 'rodinný' WHERE property_subtype_key = 14;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_broker = 'kanceláře' WHERE property_subtype_key = 16;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_broker = 'výroba' WHERE property_subtype_key = 21;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_broker = 'obchodní prostory' WHERE property_subtype_key = 22;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_broker = 'ubytování' WHERE property_subtype_key = 24;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_broker = 'pozemek' WHERE property_subtype_key = 25;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_broker = 'vila' WHERE property_subtype_key = 39;
+UPDATE realitky.cleaned.property_subtype SET subtype_code_broker = LOWER(subtype_name) WHERE property_subtype_key NOT IN (14, 16, 21, 22, 24, 25, 39);
+
 
 -- Update century21 codes
 UPDATE realitky.cleaned.property_subtype SET subtype_code_century21 = 'studio' WHERE property_subtype_key = 12;
