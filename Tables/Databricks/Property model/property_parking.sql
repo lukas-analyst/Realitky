@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_parking (
     parking_code_gaia STRING,
     parking_code_century21 STRING,
     parking_code_dreamhouse STRING,
+    parking_code_housevip STRING,
     parking_code_idnes STRING,
     parking_code_mm STRING,
     parking_code_remax STRING,
@@ -53,6 +54,7 @@ COMMENT ON COLUMN realitky.cleaned.property_parking.parking_code_broker IS 'Kód
 COMMENT ON COLUMN realitky.cleaned.property_parking.parking_code_gaia IS 'Kód typu parkování pro realitní web gaia.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_parking.parking_code_century21 IS 'Kód typu parkování pro realitní web century21.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_parking.parking_code_dreamhouse IS 'Kód typu parkování pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_parking.parking_code_housevip IS 'Kód typu parkování pro realitní web housevip.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_parking.parking_code_idnes IS 'Kód typu parkování pro realitní web reality.idnes.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_parking.parking_code_mm IS 'Kód typu parkování pro realitní web mmreality.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_parking.parking_code_remax IS 'Kód typu parkování pro realitní web remax.cz.';

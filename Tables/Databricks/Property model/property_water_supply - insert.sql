@@ -16,6 +16,7 @@ INSERT INTO realitky.cleaned.property_water_supply
     -- water_supply_code_gaia,
     -- water_supply_code_century21,
     -- water_supply_code_dreamhouse,
+    -- water_supply_code_housevip,
     -- water_supply_code_idnes,
     -- water_supply_code_mm,
     -- water_supply_code_remax,
@@ -50,6 +51,12 @@ UPDATE realitky.cleaned.property_water_supply SET water_supply_code_century21 = 
 UPDATE realitky.cleaned.property_water_supply SET water_supply_code_century21 = 'Společná studna' WHERE property_water_supply_key = 6;
 UPDATE realitky.cleaned.property_water_supply SET water_supply_code_century21 = 'Není' WHERE property_water_supply_key = 7;
 UPDATE realitky.cleaned.property_water_supply SET water_supply_code_century21 = water_supply_code WHERE property_water_supply_key NOT IN (1, 2, 3, 6, 7);
+
+-- Update housevip codes
+UPDATE realitky.cleaned.property_water_supply SET water_supply_code_housevip = 'Dálkový vodovod' WHERE property_water_supply_key = 2;
+UPDATE realitky.cleaned.property_water_supply SET water_supply_code_housevip = 'Místní zdroj' WHERE property_water_supply_key = 3;
+UPDATE realitky.cleaned.property_water_supply SET water_supply_code_housevip = 'Studna' WHERE property_water_supply_key = 4;
+UPDATE realitky.cleaned.property_water_supply SET water_supply_code_housevip = water_supply_name WHERE property_water_supply_key NOT IN (2, 3, 4);
 
 -- Update idnes codes
 UPDATE realitky.cleaned.property_water_supply SET water_supply_code_idnes = 'vlastní zdroj' WHERE property_water_supply_key = 3;

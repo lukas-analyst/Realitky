@@ -1,9 +1,9 @@
 MERGE INTO realitky.cleaned.property AS target
   USING (
     SELECT
-        listing_details_sreality.listing_url,
-        listing_details_sreality.listing_id AS property_id,
-        listing_details_sreality.name AS property_name,
+        listing_details_housevip.listing_url,
+        listing_details_housevip.listing_id AS property_id,
+        listing_details_housevip.property_name AS property_name,
         -- address is handled using reverse geolocation --
         'XNA' AS address_street,
         'XNA' AS address_house_number,
@@ -17,81 +17,66 @@ MERGE INTO realitky.cleaned.property AS target
         0 AS address_longitude,
         COALESCE(property_type.property_type_key, -1) :: INT AS property_type_id,
         COALESCE(property_subtype.property_subtype_key, -1) :: INT AS property_subtype_id,
-        CASE
-          WHEN listing_details_sreality.podlazi IS NULL THEN -1
-          WHEN listing_details_sreality.podlazi LIKE '%z celkem%' 
-            THEN TRY_CAST(
-              REGEXP_EXTRACT(listing_details_sreality.podlazi, 'z celkem ([0-9]+)', 1)
-              AS INT
-            )
-          ELSE -1
-        END AS property_number_of_floors,
-        CASE
-          WHEN LOWER(listing_details_sreality.podlazi) = 'přízemí%' THEN 1
-          WHEN listing_details_sreality.podlazi RLIKE '^(-?[0-9]+)\\. podlaží' THEN TRY_CAST(REGEXP_EXTRACT(listing_details_sreality.podlazi, '^(-?[0-9]+)\\. podlaží', 1) AS INT)
-          WHEN listing_details_sreality.podlazi RLIKE '^(-?[0-9]+)$' THEN TRY_CAST(listing_details_sreality.podlazi AS INT)
-          WHEN listing_details_sreality.podlazi RLIKE '^(-?[0-9]+) včetně' THEN TRY_CAST(REGEXP_EXTRACT(listing_details_sreality.podlazi, '^(-?[0-9]+) včetně', 1) AS INT)
-          ELSE -9
-        END AS property_floor_number,
+        COALESCE(listing_details_housevip.pocet_podlazi, -1) :: INT AS property_number_of_floors,
+        COALESCE(REGEXP_EXTRACT(LEFT(listing_details_housevip.podlazi_umisteni, 3), '(-?[0-9]+)'), -9) :: INT AS property_floor_number,
         COALESCE(property_location.property_location_key, -1) :: INT AS property_location_id,
         COALESCE(property_construction_type.property_construction_type_key, -1) :: INT AS property_construction_type_id,
-        TRY_CAST(COALESCE(listing_details_sreality.celkova_plocha, listing_details_sreality.uzitna_ploch, '-1') AS DOUBLE) AS area_total_sqm,
-        TRY_CAST(COALESCE(listing_details_sreality.plocha_pozemku, listing_details_sreality.plocha_zahrady, '-1') AS DOUBLE) AS area_land_sqm,
-        -1 AS number_of_rooms,
-        COALESCE(TRY_CAST(RIGHT(listing_details_sreality.datum_ukonceni_vystavby, 4) AS INT), -1) AS construction_year,
-        COALESCE(listing_details_sreality.rok_rekonstrukce, -1) :: INT AS last_reconstruction_year,
-        COALESCE(SUBSTRING(listing_details_sreality.energeticka_narocnost_budovy, 7, 1), 'X') AS energy_class_penb,
-        COALESCE(listing_details_sreality.stav_objektu, 'XNA') AS property_condition,
-        CASE 
-          WHEN listing_details_sreality.parkovani IS NULL THEN -1
-          WHEN LOWER(listing_details_sreality.parkovani) IN ('ne', 'false', '0') THEN 0
-          ELSE 1
-        END :: INT AS property_parking_id,
+        TRY_CAST(REGEXP_REPLACE(COALESCE(listing_details_housevip.celkova_plocha, listing_details_housevip.uzitna_plocha, '-1'), '[^0-9-]', '') AS DOUBLE) AS area_total_sqm,
+        TRY_CAST(REGEXP_REPLACE(COALESCE(listing_details_housevip.plocha_zahrady, listing_details_housevip.plocha_pozemku, '-1'), '[^0-9-]', '') AS DOUBLE) AS area_land_sqm,
+        CASE
+          WHEN listing_details_housevip.velikost = '5 a více pokojů' 
+            THEN 6
+          ELSE COALESCE(TRY_CAST(LEFT(listing_details_housevip.velikost, 1) AS INT), -1)
+        END AS number_of_rooms,
+        COALESCE(listing_details_housevip.rok_vystavby, -1) :: INT AS construction_year,
+        -1 AS last_reconstruction_year,
+        COALESCE(LEFT(listing_details_housevip.en_narocnost_b, 1), 'X') AS energy_class_penb,
+        COALESCE(listing_details_housevip.stav_objektu, 'XNA') AS property_condition,
+        COALESCE(property_parking.property_parking_key) AS property_parking_id,
         COALESCE(property_heating.property_heating_key, -1) :: INT AS property_heating_id,
         COALESCE(property_electricity.property_electricity_key, -1) :: INT AS property_electricity_id,
         COALESCE(property_accessibility.property_accessibility_key, -1) :: INT AS property_accessibility_id,
-        CASE 
-          WHEN listing_details_sreality.balkon IS NULL THEN -1
-          WHEN LOWER(listing_details_sreality.balkon) IN ('ne', 'false', '0') THEN 0
-          ELSE 1
+        CASE
+          WHEN listing_details_housevip.balkon IS NOT null THEN 1
+          ELSE 0
         END AS property_balcony,
-        CASE 
-          WHEN COALESCE(listing_details_sreality.lodzie, listing_details_sreality.terasa) IS NULL THEN -1
-          WHEN LOWER(COALESCE(listing_details_sreality.lodzie, listing_details_sreality.terasa)) IN ('ne', 'false', '0') THEN 0
-          ELSE 1
-        END  AS property_terrace,
-        CASE 
-          WHEN listing_details_sreality.sklep IS NULL THEN -1
-          WHEN LOWER(listing_details_sreality.sklep) IN ('ne', 'false', '0') THEN 0
-          ELSE 1
+        CASE
+          WHEN listing_details_housevip.lodzie IS NOT null THEN 1
+          WHEN listing_details_housevip.terasa IS NOT null THEN 1
+          ELSE 0
+        END AS property_terrace,
+        CASE
+          WHEN listing_details_housevip.sklep IS NOT null THEN 1
+          WHEN listing_details_housevip.plocha_skladu IS NOT null THEN 1
+          ELSE 0
         END AS property_cellar,
         CASE
-          WHEN listing_details_sreality.vytah = 'True' THEN 1
-          WHEN listing_details_sreality.vytah = 'False' THEN 0
+          WHEN listing_details_housevip.vytah = 'ano' THEN 1
+          WHEN listing_details_housevip.vytah = 'ne' THEN 0
           ELSE -1
         END AS property_elevator,
         CASE
-          WHEN LOWER(listing_details_sreality.odpad) LIKE '%jímka%' THEN 'jímka'
-          WHEN LOWER(listing_details_sreality.odpad) LIKE '%septik%' THEN 'jímka'
-          WHEN LOWER(listing_details_sreality.odpad) LIKE '%trativod%' THEN 'jímka'
-          WHEN LOWER(listing_details_sreality.odpad) LIKE '%kanalizace%' THEN 'kanalizace'
-          WHEN LOWER(listing_details_sreality.odpad) LIKE '%čov%' THEN 'kanalizace'
+          WHEN listing_details_housevip.odpad IN ('Jímka', 'Septik') THEN 'jímka'
+          WHEN listing_details_housevip.odpad IN ('Veřejná kanalizace', 'ČOV pro celý objekt', 'Veřejná kanalizace, Jímka', 'Veřejná kanalizace, ČOV pro celý objekt') THEN 'kanalizace' 
           ELSE 'XNA'
         END AS property_canalization,
-        IF(listing_details_sreality.voda IS NOT null, 2, 1) :: INT AS property_water_supply_id,
-        'XNA' AS property_air_conditioning,
-        COALESCE(property_gas.property_gas_key, -1) :: INT AS property_gas_id,
-        IF(LOWER(listing_details_sreality.telekomunikace) LIKE '%internet%', 1, -1) AS property_internet,
+        COALESCE(property_water_supply.property_water_supply_key, -1) :: INT AS property_water_supply_id,
         CASE
-          WHEN listing_details_sreality.vybaveni = 'True' THEN 'Vybaveno'
-          WHEN listing_details_sreality.vybaveni = 'False' THEN 'Nevybaveno'
-          ELSE 'XNA'
-        END AS furnishing_level,
-        COALESCE(listing_details_sreality.vlastnictvi, 'XNA') AS ownership_type,
-        IF(listing_details_sreality.status = 'inactive', false, true) AS is_active_listing,
-        COALESCE(listing_details_sreality.reserved, False) AS reserved,
-        listing_details_sreality.listing_url AS source_url,
-        COALESCE(listing_details_sreality.description, 'XNA') AS description,
+          WHEN LOWER(listing_details_housevip.topne_teleso) LIKE '%klimatizace%' THEN 1
+          ELSE 0
+        END AS property_air_conditioning,
+        COALESCE(property_gas.property_gas_key, -1) :: INT AS property_gas_id,
+        CASE
+          WHEN listing_details_housevip.typ_internetoveho_pripojeni IN ('ADSL', 'Optika', 'VDSL') THEN 1
+          WHEN listing_details_housevip.typ_internetoveho_pripojeni = 'Vzduchem' THEN 0
+          ELSE -1
+        END AS property_internet,
+        IF(listing_details_housevip.zarizeny IN ('Ano', 'Částečně'), 'Vybaveno', 'Nevybaveno') AS furnishing_level,
+        COALESCE(listing_details_housevip.vlastnictvi, 'XNA') AS ownership_type,
+        IF(listing_details_housevip.status = 'inactive', false, true) AS is_active_listing,
+        COALESCE(listing_details_housevip.reserved, False) AS reserved,
+        listing_details_housevip.listing_url AS source_url,
+        COALESCE(listing_details_housevip.property_description, 'XNA') AS description,
         :cleaner AS src_web,
         current_timestamp() AS ins_dt,
         :process_id AS ins_process_id,
@@ -99,82 +84,107 @@ MERGE INTO realitky.cleaned.property AS target
         :process_id AS upd_process_id,
         false AS del_flag
         
-    FROM realitky.raw.listing_details_sreality
+    FROM realitky.raw.listing_details_housevip
       LEFT JOIN realitky.cleaned.property_type 
-        ON LOWER(listing_details_sreality.property_type) = property_type.type_code_sreality
-          AND property_type.del_flag = false
+        ON 
+            CASE 
+                WHEN LEFT(listing_details_housevip.kategorie, 4) = 'Byty'
+                  THEN 'Byty'
+                WHEN listing_details_housevip.kategorie = 'Apartmány'
+                  THEN 'Byty'
+                WHEN listing_details_housevip.kategorie IN ('Činžovní domy', 'Vícegenerační dům')
+                  THEN 'Rodinné domy'
+                WHEN listing_details_housevip.kategorie = 'Chalupa'
+                  THEN 'Chata'
+                WHEN listing_details_housevip.kategorie = 'Ordinace'
+                  THEN 'Pozemky pro komerční výstavbu'
+                ELSE listing_details_housevip.kategorie
+            END = property_type.type_code_housevip
       LEFT JOIN realitky.cleaned.property_subtype 
-        ON
-          CASE
-            WHEN listing_details_sreality.disposition = 'Chalupa' THEN 'Chata'
-            WHEN listing_details_sreality.disposition = 'Neznámé' THEN 'Nespecifikováno'
-            ELSE LOWER(listing_details_sreality.disposition)
-          END = property_subtype.subtype_code_sreality
-          AND property_subtype.del_flag = false
+        ON 
+            CASE 
+                WHEN LEFT(listing_details_housevip.kategorie, 4) = 'Byty'
+                  THEN SUBSTRING(listing_details_housevip.kategorie, 5)
+                WHEN listing_details_housevip.kategorie IN ('Činžovní domy', 'Vícegenerační dům', 'Rodinné domy', 'Ordinace')
+                  THEN 'nespecifikováno'
+                WHEN listing_details_housevip.kategorie = 'Chalupa'
+                  THEN 'chata'
+                WHEN LOWER(listing_details_housevip.kategorie) LIKE '%pozemky%'
+                  THEN 'pozemky pro bydlení'
+                ELSE LOWER(listing_details_housevip.kategorie)
+            END = property_subtype.subtype_code_housevip
       LEFT JOIN realitky.cleaned.property_location
-        ON LOWER(listing_details_sreality.umisteni_objektu) = property_location.location_code_sreality
+        ON 
+          listing_details_housevip.umisteni_objektu = property_location.location_code_housevip
           AND property_location.del_flag = false
       LEFT JOIN realitky.cleaned.property_construction_type 
-        ON LOWER(listing_details_sreality.stavba) = property_construction_type.construction_code_sreality
+        ON
+          listing_details_housevip.budova = property_construction_type.construction_code_housevip
           AND property_construction_type.del_flag = false
-      LEFT JOIN realitky.cleaned.property_heating
+      LEFT JOIN realitky.cleaned.property_heating 
         ON 
           CASE 
-            WHEN LOWER(listing_details_sreality.topeni) LIKE '%ústřední dálkové%' THEN 'ústřední dálkové'
-            WHEN LOWER(listing_details_sreality.topeni) LIKE '%lokální plynové%' THEN 'lokální plynové'
-            WHEN LOWER(listing_details_sreality.topeni) LIKE '%lokální elektrické%' THEN 'lokální elektrické'
-            WHEN LOWER(listing_details_sreality.topeni) LIKE '%ústřední tuhá paliva%' THEN 'ústřední tuhá paliva'
-            WHEN LOWER(listing_details_sreality.topeni) LIKE '%lokální tuhá paliva%' THEN 'lokální tuhá paliva'
-            ELSE 'Nespecifikováno'
-          END = property_heating.heating_code_sreality
+                WHEN listing_details_housevip.zdroj_topeni LIKE '%Plynový%'
+                  THEN 'Plynový kotel'
+                WHEN listing_details_housevip.zdroj_topeni LIKE '%Tepelné čerpadlo%' 
+                  THEN 'Tepelné čerpadlo'
+                WHEN listing_details_housevip.zdroj_topeni LIKE '%Ústřední dálkové%'
+                  THEN 'Centrální dálkové'
+                WHEN listing_details_housevip.zdroj_topeni LIKE '%Kotel na tuhá paliva%' 
+                  THEN 'Kotel na tuhá paliva'
+                WHEN listing_details_housevip.zdroj_topeni LIKE '%Přímotop%'
+                  THEN 'Přímotop'
+                WHEN listing_details_housevip.zdroj_topeni LIKE '%Krb%'
+                  THEN 'Krb'
+                WHEN listing_details_housevip.zdroj_topeni LIKE '%Kamna%'
+                  THEN 'Krb'
+                WHEN listing_details_housevip.zdroj_topeni LIKE '%Jiné%'
+                  THEN 'Nespecifikováno'
+                ELSE listing_details_housevip.zdroj_topeni
+            END = property_heating.heating_code_housevip
           AND property_heating.del_flag = false
       LEFT JOIN realitky.cleaned.property_electricity
         ON 
           CASE 
-            WHEN listing_details_sreality.elektrina LIKE '%120%' THEN '230V'
-            WHEN listing_details_sreality.elektrina LIKE '%230%' THEN '230V'
-            WHEN listing_details_sreality.elektrina LIKE '%380%' THEN '400V'
-            WHEN listing_details_sreality.elektrina LIKE '%400%' THEN '400V'
-            WHEN LOWER(listing_details_sreality.elektrina) LIKE '%bez přípojky%' THEN '400V'
-            ELSE 'Nespecifikováno'
-          END = property_electricity.electricity_code_sreality
+            WHEN listing_details_housevip.elektrina IN ('120V, 230V') THEN '230V'
+            WHEN listing_details_housevip.elektrina IN ('230V, 400V', '120V, 230V, 400V') THEN '400V'
+            ELSE listing_details_housevip.elektrina
+          END = property_electricity.electricity_code_housevip
           AND property_electricity.del_flag = false
       LEFT JOIN realitky.cleaned.property_gas
-        ON 
-          CASE 
-            WHEN listing_details_sreality.plyn like '%plynovod%' THEN 'plynovod'
-            WHEN LOWER(listing_details_sreality.plyn) LIKE '%individuální%' THEN 'individuální'
-            ELSE listing_details_sreality.plyn
-          END = property_gas.gas_code_sreality
+        ON listing_details_housevip.plyn = property_gas.gas_code_housevip
           AND property_gas.del_flag = false
       LEFT JOIN realitky.cleaned.property_water_supply
         ON 
-          CASE 
-            WHEN LOWER(listing_details_sreality.voda) like '%vodovod%' THEN 'vodovod'
-            WHEN LOWER(listing_details_sreality.voda) LIKE '%místní zdroj vody%' THEN 'místní zdroj vody'
-            WHEN LOWER(listing_details_sreality.voda) LIKE '%studna%' THEN 'místní zdroj vody'
-            WHEN LOWER(listing_details_sreality.voda) LIKE '%retenční nádrž na dešťovou vodu%' THEN 'retenční nádrž na dešťovou vodu'
-            ELSE 'NEURCENO'
-          END = property_water_supply.water_supply_code_sreality
+          CASE
+            WHEN listing_details_housevip.voda IN ('Dálkový vodovod, Studna', 'Místní zdroj, Dálkový vodovod, Studna')
+              THEN 'Dálkový vodovod'
+            ELSE listing_details_housevip.voda
+          END = property_water_supply.water_supply_code_housevip
           AND property_water_supply.del_flag = false
+      LEFT JOIN realitky.cleaned.property_parking
+        ON 
+          CASE
+            WHEN listing_details_housevip.garaz = 'Ano'
+              THEN 'Garáž'
+            WHEN listing_details_housevip.parkovani = 'Ano'
+              THEN 'Parkování před domem'
+            ELSE 'Nespecifikováno'
+          END = property_parking.parking_code_housevip
+          AND property_parking.del_flag = false
       LEFT JOIN realitky.cleaned.property_accessibility
         ON 
-          CASE 
-            WHEN LOWER(listing_details_sreality.komunikace) LIKE '%asfaltová%' THEN 'asfaltová'
-            WHEN LOWER(listing_details_sreality.komunikace) LIKE '%betonová%' THEN 'betonová'
-            WHEN LOWER(listing_details_sreality.komunikace) LIKE '%dlážděná%' THEN 'dlážděná'
-            WHEN LOWER(listing_details_sreality.komunikace) LIKE '%štěrková%' THEN 'štěrková'
-            WHEN LOWER(listing_details_sreality.komunikace) LIKE '%zpevněná%' THEN 'zpevněná'
-            WHEN LOWER(listing_details_sreality.komunikace) LIKE '%šotolina%' THEN 'šotolina'
-            WHEN LOWER(listing_details_sreality.komunikace) LIKE '%neupravená%' THEN 'neupravená'
-            ELSE 'NEURCENO'
-          END = property_accessibility.accessibility_code_sreality
-
+          CASE
+            WHEN listing_details_housevip.komunikace LIKE '%Asfaltová%'
+              THEN 'Asfaltová'
+            WHEN listing_details_housevip.komunikace LIKE '%Betonová%'
+              THEN 'Betonová'
+            ELSE listing_details_housevip.komunikace
+          END = property_accessibility.accessibility_code_housevip
+          AND property_accessibility.del_flag = false
     WHERE
-      listing_details_sreality.del_flag = false
-      AND listing_details_sreality.status = 'active'
-      AND listing_details_sreality.listing_id NOT IN ('2634167116')
-
+      listing_details_housevip.del_flag = false
+      AND listing_details_housevip.status = 'active'
   ) AS source
   ON target.property_id = source.property_id
     AND target.src_web = source.src_web
@@ -210,7 +220,6 @@ MERGE INTO realitky.cleaned.property AS target
   OR target.furnishing_level <> source.furnishing_level
   OR target.ownership_type <> source.ownership_type
   OR target.is_active_listing <> source.is_active_listing
-  OR target.reserved <> source.reserved
   OR target.source_url <> source.source_url
   OR target.description <> source.description
   THEN UPDATE SET
@@ -244,7 +253,6 @@ MERGE INTO realitky.cleaned.property AS target
       furnishing_level = source.furnishing_level,
       ownership_type = source.ownership_type,
       is_active_listing = source.is_active_listing,
-      reserved = source.reserved,
       source_url = source.source_url,
       description = source.description,
       src_web = source.src_web,
@@ -292,7 +300,6 @@ MERGE INTO realitky.cleaned.property AS target
       furnishing_level,
       ownership_type,
       is_active_listing,
-      reserved,
       source_url,
       description,
       src_web,
@@ -343,7 +350,6 @@ MERGE INTO realitky.cleaned.property AS target
       source.furnishing_level,
       source.ownership_type,
       source.is_active_listing,
-      source.reserved,
       source.source_url,
       source.description,
       source.src_web,

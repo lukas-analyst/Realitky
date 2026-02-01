@@ -15,6 +15,7 @@ INSERT INTO realitky.cleaned.property_parking
     -- parking_code_gaia,
     -- parking_code_century21,
     -- parking_code_dreamhouse,
+    -- parking_code_housevip,
     -- parking_code_idnes,
     -- parking_code_mm,
     -- parking_code_remax,
@@ -55,6 +56,9 @@ UPDATE realitky.cleaned.property_parking SET parking_code_century21 = 'Kryté' W
 UPDATE realitky.cleaned.property_parking SET parking_code_century21 = 'Přidělené' WHERE property_parking_key = 6;
 UPDATE realitky.cleaned.property_parking SET parking_code_century21 = 'Bez parkování' WHERE property_parking_key = 12;
 UPDATE realitky.cleaned.property_parking SET parking_code_century21 = parking_code WHERE property_parking_key NOT IN (1, 4, 6, 12);
+
+-- Update housevip parking codes
+UPDATE realitky.cleaned.property_parking SET parking_code_housevip = parking_name;
 
 -- Update idnes parking codes
 UPDATE realitky.cleaned.property_parking SET parking_code_idnes = 'parkování na ulici' WHERE property_parking_key = 5;

@@ -15,6 +15,7 @@ INSERT INTO realitky.cleaned.property_accessibility
     -- accessibility_code_gaia,
     -- accessibility_code_century21,
     -- accessibility_code_dreamhouse,
+    -- accessibility_code_housevip,
     -- accessibility_code_idnes,
     -- accessibility_code_mm,
     -- accessibility_code_remax,
@@ -54,6 +55,15 @@ UPDATE realitky.cleaned.property_accessibility SET accessibility_code_century21 
 UPDATE realitky.cleaned.property_accessibility SET accessibility_code_century21 = 'Nezpevněná' WHERE property_accessibility_key = 7;
 UPDATE realitky.cleaned.property_accessibility SET accessibility_code_century21 = 'Zpevněná' WHERE property_accessibility_key = 8;
 UPDATE realitky.cleaned.property_accessibility SET accessibility_code_century21 = accessibility_code WHERE property_accessibility_key NOT IN (2, 3, 4, 6, 7, 8);
+
+-- Update housevip codes
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_housevip = 'Asfaltová' WHERE property_accessibility_key = 2;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_housevip = 'Betonová' WHERE property_accessibility_key = 3;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_housevip = 'Dlážděná' WHERE property_accessibility_key = 4;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_housevip = 'Štěrková' WHERE property_accessibility_key = 6;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_housevip = 'Zpevněná' WHERE property_accessibility_key = 8;
+UPDATE realitky.cleaned.property_accessibility SET accessibility_code_housevip = accessibility_name WHERE property_accessibility_key NOT IN (2, 3, 4, 6, 8);
+
 
 -- Update idnes codes
 UPDATE realitky.cleaned.property_accessibility SET accessibility_code_idnes = 'asfalt' WHERE property_accessibility_key = 2;

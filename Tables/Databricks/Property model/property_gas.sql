@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_gas (
     gas_code_gaia STRING,
     gas_code_century21 STRING,
     gas_code_dreamhouse STRING,
+    gas_code_housevip STRING,
     gas_code_idnes STRING,
     gas_code_mm STRING,
     gas_code_remax STRING,
@@ -55,6 +56,7 @@ COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_broker IS 'Kód typu pr
 COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_gaia IS 'Kód typu pro realitní web gaia.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_century21 IS 'Kód typu pro realitní web century21.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_dreamhouse IS 'Kód typu pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_housevip IS 'Kód typu pro realitní web housevip.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_idnes IS 'Kód typu pro realitní web reality.idnes.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_mm IS 'Kód typu pro realitní web mmreality.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_gas.gas_code_remax IS 'Kód typu pro realitní web remax.cz.';

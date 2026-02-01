@@ -14,6 +14,7 @@ INSERT INTO realitky.cleaned.property_location
     -- location_code_gaia,
     -- location_code_century21,
     -- location_code_dreamhouse,
+    -- location_code_housevip,
     -- location_code_idnes,
     -- location_code_mm,
     -- location_code_remax,
@@ -53,6 +54,16 @@ UPDATE realitky.cleaned.property_location SET location_code_bezrealitky = locati
 -- Update bidli location codes (bidli does not have specific codes)
 UPDATE realitky.cleaned.property_location SET location_code_bidli = 'XNA';
 
+-- Update broker location codes
+UPDATE realitky.cleaned.property_location SET location_code_broker = 'centrum obce' WHERE property_location_key = 2;
+UPDATE realitky.cleaned.property_location SET location_code_broker = 'okraj obce' WHERE property_location_key = 4;
+UPDATE realitky.cleaned.property_location SET location_code_broker = 'klidná část obce' WHERE property_location_key = 5;
+UPDATE realitky.cleaned.property_location SET location_code_broker = 'rušná část obce' WHERE property_location_key = 6;
+UPDATE realitky.cleaned.property_location SET location_code_broker = 'polosamota' WHERE property_location_key = 9;
+UPDATE realitky.cleaned.property_location SET location_code_broker = 'sídliště' WHERE property_location_key = 14;
+UPDATE realitky.cleaned.property_location SET location_code_broker = 'samota' WHERE property_location_key = 15;
+UPDATE realitky.cleaned.property_location SET location_code_broker = LOWER(location_name) WHERE property_location_key NOT IN (2, 4, 5, 6, 9, 14, 15);
+
 -- Update century21 location codes (century21 does not have specific codes)
 UPDATE realitky.cleaned.property_location SET location_code_century21 = 'XNA';
 
@@ -64,7 +75,7 @@ UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Rušná 
 UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Polosamota' WHERE property_location_key = 9;
 UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Sídliště' WHERE property_location_key = 14;
 UPDATE realitky.cleaned.property_location SET location_code_housevip = 'Venkovská' WHERE property_location_key = 15;
-UPDATE realitky.cleaned.property_location SET location_code_housevip = location_code WHERE property_location_key NOT IN (2, 4, 5, 6, 9, 14, 15);
+UPDATE realitky.cleaned.property_location SET location_code_housevip = location_name WHERE property_location_key NOT IN (2, 4, 5, 6, 9, 14, 15);
 
 
 -- Update idnes location codes

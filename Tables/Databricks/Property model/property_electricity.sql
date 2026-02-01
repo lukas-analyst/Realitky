@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_electricity (
     electricity_code_gaia STRING,
     electricity_code_century21 STRING,
     electricity_code_dreamhouse STRING,
+    electricity_code_housevip STRING,
     electricity_code_idnes STRING,
     electricity_code_mm STRING,
     electricity_code_remax STRING,
@@ -55,6 +56,7 @@ COMMENT ON COLUMN realitky.cleaned.property_electricity.electricity_code_broker 
 COMMENT ON COLUMN realitky.cleaned.property_electricity.electricity_code_gaia IS 'Kód typu elektřiny pro realitní web gaia.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_electricity.electricity_code_century21 IS 'Kód typu elektřiny pro realitní web century21.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_electricity.electricity_code_dreamhouse IS 'Kód typu elektřiny pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_electricity.electricity_code_housevip IS 'Kód typu elektřiny pro realitní web housevip.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_electricity.electricity_code_idnes IS 'Kód typu elektřiny pro realitní web reality.idnes.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_electricity.electricity_code_mm IS 'Kód typu elektřiny pro realitní web mmreality.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_electricity.electricity_code_remax IS 'Kód typu elektřiny pro realitní web remax.cz.';

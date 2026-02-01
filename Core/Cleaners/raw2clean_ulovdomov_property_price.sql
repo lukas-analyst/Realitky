@@ -35,6 +35,8 @@ USING(
             ELSE 'XNA'
         END AS price_type,
         COALESCE(listing_details_ulovdomov.price_details, 'XNA') AS price_detail,
+        listing_details_ulovdomov.reserved AS reserved,
+        listing_details_ulovdomov.status AS status,
         :cleaner AS src_web,
         current_timestamp() AS ins_dt,
         :process_id AS ins_process_id,
@@ -49,9 +51,11 @@ ON target.property_id = source.property_id
   AND target.src_web = source.src_web
   AND target.del_flag = false
 WHEN MATCHED 
-    AND target.price_amount <> source.price_amount
+    AND (target.price_amount <> source.price_amount
     OR target.price_per_sqm <> source.price_per_sqm
-    OR target.price_type <> source.price_type
+    OR target.price_type <> source.price_type)
+    AND source.reserved = False 
+    AND source.status = 'active'
 THEN UPDATE SET
         target.price_amount = source.price_amount,
         target.price_per_sqm = source.price_per_sqm,

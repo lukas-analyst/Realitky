@@ -16,6 +16,7 @@ INSERT INTO realitky.cleaned.property_electricity
     -- electricity_code_gaia,
     -- electricity_code_century21,
     -- electricity_code_dreamhouse,
+    -- electricity_code_housevip,
     -- electricity_code_idnes,
     -- electricity_code_mm,
     -- electricity_code_remax,
@@ -56,6 +57,13 @@ UPDATE realitky.cleaned.property_electricity SET electricity_code_century21 = 'N
 UPDATE realitky.cleaned.property_electricity SET electricity_code_century21 = 'Jiný' WHERE property_electricity_key = 8;
 UPDATE realitky.cleaned.property_electricity SET electricity_code_century21 = electricity_code WHERE property_electricity_key NOT IN (3, 7, 8);
 
+-- Update housevip codes
+UPDATE realitky.cleaned.property_electricity SET electricity_code_housevip = '230V' WHERE property_electricity_key = 2;
+UPDATE realitky.cleaned.property_electricity SET electricity_code_housevip = '400V' WHERE property_electricity_key = 3;
+UPDATE realitky.cleaned.property_electricity SET electricity_code_housevip = 'bez elektřiny' WHERE property_electricity_key = 7;
+UPDATE realitky.cleaned.property_electricity SET electricity_code_housevip = 'vlastní zdroj' WHERE property_electricity_key = 8;
+UPDATE realitky.cleaned.property_electricity SET electricity_code_housevip = electricity_code WHERE property_electricity_key NOT IN (2, 3, 7, 8);
+
 -- Update idnes codes
 UPDATE realitky.cleaned.property_electricity SET electricity_code_idnes = 'bez elektřiny' WHERE property_electricity_key = 7;
 UPDATE realitky.cleaned.property_electricity SET electricity_code_idnes = 'vlastní zdroj' WHERE property_electricity_key = 8;
@@ -71,6 +79,6 @@ UPDATE realitky.cleaned.property_electricity SET electricity_code_sreality = 'be
 UPDATE realitky.cleaned.property_electricity SET electricity_code_sreality = electricity_code WHERE property_electricity_key NOT IN (7);
 
 -- Update ulovdomov codes (ulovdomov does not have specific codes)
-UPDATE realitky.cleaned.property_electricity SET electricity_code_ulovdomov = 'XNA'
+UPDATE realitky.cleaned.property_electricity SET electricity_code_ulovdomov = 'XNA';
 
 SELECT * FROM realitky.cleaned.property_electricity;

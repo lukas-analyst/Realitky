@@ -52,10 +52,17 @@ UPDATE realitky.cleaned.property_construction_type SET construction_code_bezreal
 -- Update bidli codes (bidli does not have specific codes)
 UPDATE realitky.cleaned.property_construction_type SET construction_code_bidli = 'XNA';
 
+-- Update broker codes
+UPDATE realitky.cleaned.property_construction_type SET construction_code_broker = 'Montovaná' WHERE property_construction_type_key = 5;
+UPDATE realitky.cleaned.property_construction_type SET construction_code_broker = construction_name WHERE property_construction_type_key <> 5;
+
 -- Update century21 codes
 UPDATE realitky.cleaned.property_construction_type SET construction_code_century21 = 'Dřevostavba' WHERE property_construction_type_key = 4;
 UPDATE realitky.cleaned.property_construction_type SET construction_code_century21 = 'PREFABRICATED' WHERE property_construction_type_key = 10;
 UPDATE realitky.cleaned.property_construction_type SET construction_code_century21 = construction_code WHERE property_construction_type_key NOT IN (4, 10);
+
+-- Update housevip codes
+UPDATE realitky.cleaned.property_construction_type SET construction_code_housevip = construction_name;
 
 -- Update idnes codes
 UPDATE realitky.cleaned.property_construction_type SET construction_code_idnes = 'panelová' WHERE property_construction_type_key = 2;

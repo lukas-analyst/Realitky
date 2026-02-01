@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property_water_supply (
     water_supply_code_gaia STRING,
     water_supply_code_century21 STRING,
     water_supply_code_dreamhouse STRING,
+    water_supply_code_housevip STRING,
     water_supply_code_idnes STRING,
     water_supply_code_mm STRING,
     water_supply_code_remax STRING,
@@ -57,6 +58,7 @@ COMMENT ON COLUMN realitky.cleaned.property_water_supply.water_supply_code_broke
 COMMENT ON COLUMN realitky.cleaned.property_water_supply.water_supply_code_gaia IS 'Kód typu vodovodní přípojky pro realitní web gaia.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_water_supply.water_supply_code_century21 IS 'Kód typu vodovodní přípojky pro realitní web century21.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_water_supply.water_supply_code_dreamhouse IS 'Kód typu vodovodní přípojky pro realitní web dreamhome.cz.';
+COMMENT ON COLUMN realitky.cleaned.property_water_supply.water_supply_code_housevip IS 'Kód typu vodovodní přípojky pro realitní web housevip.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_water_supply.water_supply_code_idnes IS 'Kód typu vodovodní přípojky pro realitní web reality.idnes.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_water_supply.water_supply_code_mm IS 'Kód typu vodovodní přípojky pro realitní web mmreality.cz.';
 COMMENT ON COLUMN realitky.cleaned.property_water_supply.water_supply_code_remax IS 'Kód typu vodovodní přípojky pro realitní web remax.cz.';
