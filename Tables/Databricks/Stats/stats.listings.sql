@@ -2,19 +2,19 @@
 -- DROP TABLE realitky.stats.listings;
 
 CREATE TABLE IF NOT EXISTS realitky.stats.listings (
-    listings_key BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY COMMENT 'Unikátní identifikátor souhrnu inzerátů.',
-    date DATE COMMENT 'Datum agregace statistik.',
-    src_web STRING COMMENT 'Zdrojová webová stránka.',
-    total_listings INT COMMENT 'Celkový počet inzerátů.',
-    scraped_true INT COMMENT 'Počet inzerátů, které byly úspěšně staženy (scraped = true).',
-    parsed_true INT COMMENT 'Počet inzerátů, které byly úspěšně zpracovány (parsed = true).',
-    located_true INT COMMENT 'Počet inzerátů, které mají určenou polohu (located = true).',
-    status_active INT COMMENT 'Počet aktivních inzerátů (status = active).',
-    ins_dt TIMESTAMP COMMENT 'Datum vložení záznamu.',
-    ins_process_id STRING COMMENT 'ID procesu, který vložil záznam (pro sledování původu dat).',
-    upd_dt TIMESTAMP COMMENT 'Datum poslední aktualizace záznamu.',
-    upd_process_id STRING COMMENT 'ID procesu, který naposledy aktualizoval záznam (pro sledování původu dat).',
-    del_flag BOOLEAN COMMENT 'Příznak smazání záznamu.'
+    listings_key BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    date DATE,
+    src_web STRING,
+    total_listings INT,
+    scraped_true INT,
+    parsed_true INT,
+    located_true INT,
+    status_active INT,
+    ins_dt TIMESTAMP,
+    ins_process_id STRING,
+    upd_dt TIMESTAMP,
+    upd_process_id STRING,
+    del_flag BOOLEAN
 )
 USING DELTA
 PARTITIONED BY (src_web)
