@@ -4,14 +4,18 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property (
     property_id STRING NOT NULL, -- Unikátní identifikátor nemovitosti (UUID)
     property_name STRING NOT NULL, -- Název nemovitosti (např. "Prodej bytu 2+kk v Praze")
     
-    address_street STRING NOT NULL, -- Ulice
-    address_house_number STRING NOT NULL, -- Číslo popisné/číslo orientační
-    ruian_code STRING NOT NULL, -- Kód RÚIAN (pro propojení s demografickými daty ČSÚ)
-    address_city STRING NOT NULL, -- Město/obec
-    address_state STRING NOT NULL, -- Kraj
     address_country_code STRING NOT NULL, -- Stát (kód)
     address_postal_code STRING NOT NULL, -- PSČ
-    address_district_code STRING, -- Kód městské části/okresu (pro propojení s demografickými daty ČSÚ)
+    address_district_code STRING NOT NULL, -- Kód městské části/okresu (pro propojení s demografickými daty ČSÚ)
+    address_state STRING NOT NULL, -- Kraj
+    address_city STRING NOT NULL, -- Město/obec
+    address_street STRING NOT NULL, -- Ulice
+    address_house_number STRING NOT NULL, -- Číslo popisné
+    address_street_number STRING NOT NULL, -- číslo orientační
+    address_averaged_flag BOOLEAN NOT NULL, -- Příznak, zda je adresa průměrována (TRUE/FALSE)
+    
+    ruian_code STRING NOT NULL, -- Kód RÚIAN (pro propojení s demografickými daty ČSÚ)
+    ruian_confidence DECIMAL(5,2) NOT NULL, -- Míra důvěry v přesnost kódu RÚIAN (0-100%)
     address_latitude DECIMAL(9,6) NOT NULL, -- Zeměpisná šířka
     address_longitude DECIMAL(9,6) NOT NULL, -- Zeměpisná délka
     
@@ -50,7 +54,9 @@ CREATE TABLE IF NOT EXISTS realitky.cleaned.property (
     
     furnishing_level STRING NOT NULL, -- Částečně zařízeno, nezařízeno, plně zařízeno, null
     ownership_type STRING NOT NULL, -- Osobní, družstevní, obecní, státní, jiný
+
     is_active_listing BOOLEAN NOT NULL, -- Zda je nemovitost aktuálně inzerována
+    reserved BOOLEAN NOT NULL, -- Příznak, zda je nemovitost rezervována (TRUE/FALSE)
     source_url STRING NOT NULL, -- URL na inzerát
     description STRING NOT NULL, -- Popis nemovitosti
     
@@ -78,47 +84,63 @@ COMMENT ON TABLE realitky.cleaned.property IS 'Základní informace o nemovitost
 -- Column comments
 COMMENT ON COLUMN realitky.cleaned.property.property_id IS 'Unikátní identifikátor nemovitosti (UUID).';
 COMMENT ON COLUMN realitky.cleaned.property.property_name IS 'Název nemovitosti (např. "Prodej bytu 2+kk v Praze").';
-COMMENT ON COLUMN realitky.cleaned.property.address_street IS 'Ulice.';
-COMMENT ON COLUMN realitky.cleaned.property.address_house_number IS 'Číslo popisné/číslo orientační.';
-COMMENT ON COLUMN realitky.cleaned.property.ruian_code IS 'Kód RÚIAN (pro propojení s demografickými daty ČSÚ).';
-COMMENT ON COLUMN realitky.cleaned.property.address_city IS 'Město/obec.';
-COMMENT ON COLUMN realitky.cleaned.property.address_state IS 'Kraj.';
+
 COMMENT ON COLUMN realitky.cleaned.property.address_country_code IS 'Stát (kód).';
 COMMENT ON COLUMN realitky.cleaned.property.address_postal_code IS 'PSČ.';
 COMMENT ON COLUMN realitky.cleaned.property.address_district_code IS 'Kód městské části/okresu (pro propojení s demografickými daty ČSÚ).';
+COMMENT ON COLUMN realitky.cleaned.property.address_state IS 'Kraj.';
+COMMENT ON COLUMN realitky.cleaned.property.address_city IS 'Město/obec.';
+COMMENT ON COLUMN realitky.cleaned.property.address_street IS 'Ulice.';
+COMMENT ON COLUMN realitky.cleaned.property.address_house_number IS 'Číslo popisné.';
+COMMENT ON COLUMN realitky.cleaned.property.address_street_number IS 'Číslo orientační.';
+COMMENT ON COLUMN realitky.cleaned.property.address_averaged_flag IS 'Příznak, zda je adresa průměrována (TRUE/FALSE).';
+
+COMMENT ON COLUMN realitky.cleaned.property.ruian_code IS 'Kód RÚIAN (pro propojení s demografickými daty ČSÚ).';
+COMMENT ON COLUMN realitky.cleaned.property.ruian_confidence IS 'Míra důvěry v přesnost kódu RÚIAN (0-100%).';
 COMMENT ON COLUMN realitky.cleaned.property.address_latitude IS 'Zeměpisná šířka.';
 COMMENT ON COLUMN realitky.cleaned.property.address_longitude IS 'Zeměpisná délka.';
+
 COMMENT ON COLUMN realitky.cleaned.property.property_type_id IS 'Byt, dům, pozemek, komerční (FK na property_type).';
 COMMENT ON COLUMN realitky.cleaned.property.property_subtype_id IS '2+kk, řadový, pole, kancelář (FK na property_subtype).';
+
 COMMENT ON COLUMN realitky.cleaned.property.property_number_of_floors IS 'Počet podlaží (pro domy).';
 COMMENT ON COLUMN realitky.cleaned.property.property_floor_number IS 'Číslo podlaží (pro byty).';
 COMMENT ON COLUMN realitky.cleaned.property.property_location_id IS 'Typ lokality (FK na property_location).';
 COMMENT ON COLUMN realitky.cleaned.property.property_construction_type_id IS 'Typ konstrukce (panel, cihla, dřevostavba) (FK na property_construction_type).';
+
 COMMENT ON COLUMN realitky.cleaned.property.area_total_sqm IS 'Celková užitá/zastavěná plocha v m².';
 COMMENT ON COLUMN realitky.cleaned.property.area_land_sqm IS 'Plocha pozemku v m² (pro domy/pozemky).';
 COMMENT ON COLUMN realitky.cleaned.property.number_of_rooms IS 'Počet místností.';
+
 COMMENT ON COLUMN realitky.cleaned.property.construction_year IS 'Rok výstavby.';
 COMMENT ON COLUMN realitky.cleaned.property.last_reconstruction_year IS 'Rok poslední větší rekonstrukce.';
 COMMENT ON COLUMN realitky.cleaned.property.energy_class_penb IS 'Energetická třída (A-G).';
 COMMENT ON COLUMN realitky.cleaned.property.property_condition IS 'Stav nemovitosti (novostavba, dobrý, standard, k rekonstrukci, špatný).';
+
 COMMENT ON COLUMN realitky.cleaned.property.property_parking_id IS 'Typ parkování (FK na property_parking).';
 COMMENT ON COLUMN realitky.cleaned.property.property_heating_id IS 'ID vytápění (FK na property_heating).';
 COMMENT ON COLUMN realitky.cleaned.property.property_electricity_id IS 'ID elektrické energie (FK na property_electricity).';
 COMMENT ON COLUMN realitky.cleaned.property.property_accessibility_id IS 'Typ přístupové cesty (FK na property_accessibility).';
+
 COMMENT ON COLUMN realitky.cleaned.property.property_balcony IS 'Plocha balkonu v m² (pokud je přítomen).';
 COMMENT ON COLUMN realitky.cleaned.property.property_terrace IS 'Plocha terasy v m² (pokud je přítomna).';
 COMMENT ON COLUMN realitky.cleaned.property.property_cellar IS 'Plocha sklepa v m² (pokud je přítomen).';
 COMMENT ON COLUMN realitky.cleaned.property.property_elevator IS 'Zda je přítomen výtah (TRUE/FALSE).';
+
 COMMENT ON COLUMN realitky.cleaned.property.property_canalization IS 'Typ kanalizace.';
 COMMENT ON COLUMN realitky.cleaned.property.property_water_supply_id IS 'Typ vody na pozemku (FK na property_water_supply).';
 COMMENT ON COLUMN realitky.cleaned.property.property_air_conditioning IS 'Typ klimatizace.';
 COMMENT ON COLUMN realitky.cleaned.property.property_gas_id IS 'Typ plynu (FK na property_gas).';
 COMMENT ON COLUMN realitky.cleaned.property.property_internet IS 'Zda je přítomen internet (TRUE/FALSE).';
+
 COMMENT ON COLUMN realitky.cleaned.property.furnishing_level IS 'Částečně zařízeno, nezařízeno, plně zařízeno, null.';
 COMMENT ON COLUMN realitky.cleaned.property.ownership_type IS 'Osobní, družstevní, obecní, státní, jiný.';
+
 COMMENT ON COLUMN realitky.cleaned.property.is_active_listing IS 'Zda je nemovitost aktuálně inzerována.';
+COMMENT ON COLUMN realitky.cleaned.property.reserved IS 'Příznak, zda je nemovitost rezervována (TRUE/FALSE).';
 COMMENT ON COLUMN realitky.cleaned.property.source_url IS 'URL na inzerát.';
 COMMENT ON COLUMN realitky.cleaned.property.description IS 'Popis nemovitosti.';
+
 COMMENT ON COLUMN realitky.cleaned.property.src_web IS 'Zdrojová webová stránka (např. Sreality, Bezrealitky).';
 COMMENT ON COLUMN realitky.cleaned.property.ins_dt IS 'Datum vložení záznamu.';
 COMMENT ON COLUMN realitky.cleaned.property.ins_process_id IS 'ID procesu, který vložil záznam (pro sledování původu dat).';

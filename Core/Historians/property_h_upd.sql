@@ -1,8 +1,14 @@
--- TASK 2: property_h_upd.sql 
-
--- Najde staré verze záznamů, které mají novější verze
--- Uzavře" je - nastaví `current_flag = FALSE`
--- Doplní datum konce platnosti (`valid_to`)
+-- ============================================================================
+-- TASK 2: property_h_upd.sql
+-- 
+-- Uzavírání starých verzí záznamů (SCD Type 2)
+-- 
+-- Logika:
+-- 1. Identifikuje všechny aktuální záznamy (current_flag = TRUE)
+-- 2. Najde ty, které mají novější verzi (next_valid_from IS NOT NULL)
+-- 3. Uzavře je - nastaví current_flag = FALSE a doplní valid_to
+-- 4. valid_to se nastaví na den PŘED datumem nové verze
+-- ============================================================================
 
 
 MERGE INTO realitky.cleaned.property_h AS trg
@@ -11,7 +17,7 @@ USING (
         hist.property_id,
         hist.src_web,
         hist.valid_from,
-        date_sub(hist.next_valid_from, 1) AS new_valid_to
+        DATE_SUB(hist.next_valid_from, 1) AS new_valid_to
     FROM (
         SELECT 
             property_id,
@@ -39,5 +45,5 @@ ON (
 WHEN MATCHED THEN UPDATE SET
     trg.current_flag = false,
     trg.valid_to = src.new_valid_to,
-    trg.upd_dt = current_timestamp(),
+    trg.upd_dt = CURRENT_TIMESTAMP(),
     trg.upd_process_id = :process_id;

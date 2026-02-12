@@ -1,22 +1,27 @@
+-- ============================================================================
 -- TASK 1: property_h_sql.sql
-
--- Najde změněné záznamy - porovná dnešní data s včerejšími
--- Vloží nové verze záznamů, které se změnily
--- Označí je jako aktuální (`current_flag = TRUE`)
-
+--
+-- 1. Najde změněné záznamy - porovná dnešní data s včerejšími
+-- 2. Vloží nové verze záznamů, které se změnily
+-- 3. Označí je jako aktuální (`current_flag = TRUE`)
+-- ============================================================================
 
 MERGE INTO realitky.cleaned.property_h AS trg
 USING (
     SELECT 
         property_id, 
         property_name,
+        address_country_code,
+        address_postal_code,
+        address_district_code,
+        address_state,
+        address_city,
         address_street, 
         address_house_number,
+        address_street_number,
+        address_averaged_flag,
         ruian_code, 
-        address_city, 
-        address_state, 
-        address_postal_code,
-        address_district_code, 
+        ruian_confidence,
         address_latitude, 
         address_longitude,
         property_type_id, 
@@ -48,25 +53,30 @@ USING (
         furnishing_level, 
         ownership_type, 
         is_active_listing,
+        reserved,
         source_url,
         description, 
         src_web, 
         del_flag
     FROM realitky.cleaned.property src
-    WHERE src.upd_dt::date = :load_date
+    WHERE DATE(src.upd_dt) = :load_date
     
     EXCEPT
     
     SELECT 
         property_id, 
         property_name,
+        address_country_code,
+        address_postal_code,
+        address_district_code,
+        address_state,
+        address_city,
         address_street, 
         address_house_number,
+        address_street_number,
+        address_averaged_flag,
         ruian_code, 
-        address_city, 
-        address_state, 
-        address_postal_code,
-        address_district_code, 
+        ruian_confidence,
         address_latitude, 
         address_longitude,
         property_type_id, 
@@ -98,6 +108,7 @@ USING (
         furnishing_level, 
         ownership_type, 
         is_active_listing,
+        reserved,
         source_url,
         description, 
         src_web, 
@@ -113,13 +124,17 @@ ON (
 )
 WHEN MATCHED THEN UPDATE SET
     trg.property_name = src.property_name,
-    trg.address_street = src.address_street,
-    trg.address_house_number = src.address_house_number,
-    trg.ruian_code = src.ruian_code,
-    trg.address_city = src.address_city,
-    trg.address_state = src.address_state,
+    trg.address_country_code = src.address_country_code,
     trg.address_postal_code = src.address_postal_code,
     trg.address_district_code = src.address_district_code,
+    trg.address_state = src.address_state,
+    trg.address_city = src.address_city,
+    trg.address_street = src.address_street,
+    trg.address_house_number = src.address_house_number,
+    trg.address_street_number = src.address_street_number,
+    trg.address_averaged_flag = src.address_averaged_flag,
+    trg.ruian_code = src.ruian_code,
+    trg.ruian_confidence = src.ruian_confidence,
     trg.address_latitude = src.address_latitude,
     trg.address_longitude = src.address_longitude,
     trg.property_type_id = src.property_type_id,
@@ -151,6 +166,7 @@ WHEN MATCHED THEN UPDATE SET
     trg.furnishing_level = src.furnishing_level,
     trg.ownership_type = src.ownership_type,
     trg.is_active_listing = src.is_active_listing,
+    trg.reserved = src.reserved,
     trg.source_url = src.source_url,
     trg.description = src.description,
     trg.del_flag = src.del_flag,
@@ -158,14 +174,18 @@ WHEN MATCHED THEN UPDATE SET
     trg.upd_process_id = :process_id
 WHEN NOT MATCHED THEN INSERT (
     property_id, 
-    property_name, 
+    property_name,
+    address_country_code,
+    address_postal_code,
+    address_district_code,
+    address_state,
+    address_city,
     address_street,
     address_house_number,
-    ruian_code, 
-    address_city, 
-    address_state,
-    address_postal_code,
-    address_district_code, 
+    address_street_number,
+    address_averaged_flag,
+    ruian_code,
+    ruian_confidence,
     address_latitude, 
     address_longitude,
     property_type_id, 
@@ -197,6 +217,7 @@ WHEN NOT MATCHED THEN INSERT (
     furnishing_level, 
     ownership_type, 
     is_active_listing,
+    reserved,
     source_url, 
     description, 
     src_web, 
@@ -210,14 +231,18 @@ WHEN NOT MATCHED THEN INSERT (
     current_flag
 ) VALUES (
     src.property_id, 
-    src.property_name, 
+    src.property_name,
+    src.address_country_code,
+    src.address_postal_code,
+    src.address_district_code,
+    src.address_state,
+    src.address_city,
     src.address_street, 
     src.address_house_number,
-    src.ruian_code, 
-    src.address_city, 
-    src.address_state, 
-    src.address_postal_code,
-    src.address_district_code, 
+    src.address_street_number,
+    src.address_averaged_flag,
+    src.ruian_code,
+    src.ruian_confidence,
     src.address_latitude, 
     src.address_longitude,
     src.property_type_id, 
@@ -249,6 +274,7 @@ WHEN NOT MATCHED THEN INSERT (
     src.furnishing_level, 
     src.ownership_type, 
     src.is_active_listing,
+    src.reserved,
     src.source_url, 
     src.description, 
     src.src_web, 
