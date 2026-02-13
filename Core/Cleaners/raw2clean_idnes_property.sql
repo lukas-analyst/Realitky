@@ -1,71 +1,62 @@
 MERGE INTO realitky.cleaned.property AS target
 USING (
-    SELECT
+    SELECT DISTINCT
         listing_details_idnes.listing_id AS property_id,
         listing_details_idnes.property_name AS property_name,
-        -- address is handled using reverse geolocation --
-        'XNA' AS address_street,
-        'XNA' AS address_house_number,
-        'XNA' AS ruian_code,
-        'XNA' AS address_city,
-        'XNA' AS address_state,
+
+        'XNA' AS address_country_code,
         'XNA' AS address_postal_code,
         'XNA' AS address_district_code,
+        'XNA' AS address_state,
+        'XNA' AS address_city,
+        'XNA' AS address_street,
+        'XNA' AS address_house_number,
+        'XNA' AS address_street_number,
+        false AS address_averaged_flag,
+        'XNA' AS ruian_code,
+        -1 AS ruian_confidence,
         0 AS address_latitude,
         0 AS address_longitude,
-        COALESCE(property_type.property_type_key, -1) :: INT AS property_type_id,
-        COALESCE(property_subtype.property_subtype_key, -1) :: INT AS property_subtype_id,
-        COALESCE(REGEXP_REPLACE(listing_details_idnes.pocet_podlazi, '[^0-9]', ''), -1) :: INT AS property_number_of_floors,
+
+        COALESCE(property_type.property_type_key, -1) :: BIGINT AS property_type_id,
+        COALESCE(property_subtype.property_subtype_key, -1) :: BIGINT AS property_subtype_id,
+        COALESCE(REGEXP_REPLACE(listing_details_idnes.pocet_podlazi, '[^0-9]', ''), -1) :: SMALLINT AS property_number_of_floors,
         CASE 
             WHEN listing_details_idnes.podlazi IN ('zvýšené přízemí (1. NP)','přízemí (1. NP = nadzemní podlaží)') THEN 0
             WHEN listing_details_idnes.podlazi IN ('-1. patro, suterén (1. PP = podzemní podlaží)','snížené přízemí (1. PP = podzemní podlaží)') THEN -1
             WHEN listing_details_idnes.podlazi IS null THEN -9
             ELSE REGEXP_EXTRACT(LEFT(listing_details_idnes.podlazi, 3), '(-?[0-9]+)')
-        END :: INT AS property_floor_number,
-        COALESCE(property_location.property_location_key, -1) :: INT AS property_location_id,
-        COALESCE(property_construction_type.property_construction_type_key, -1) :: INT AS property_construction_type_id,
-        COALESCE(TRY_CAST(REGEXP_EXTRACT(COALESCE(listing_details_idnes.celkova_plocha, listing_details_idnes.uzitna_plocha), '([0-9]+)', 1) AS DOUBLE), -1) AS area_total_sqm,
-        COALESCE(LEFT(listing_details_idnes.plocha_pozemku, LENGTH(listing_details_idnes.plocha_pozemku) -3) :: DOUBLE, -1) AS area_land_sqm,
-        COALESCE(listing_details_idnes.pocet_mistnosti, -1) :: INT AS number_of_rooms,
-        COALESCE(listing_details_idnes.vystavba_rok, listing_details_idnes.vystavba, listing_details_idnes.kolaudace, -1) :: INT AS construction_year,
-        COALESCE(listing_details_idnes.rekonstrukce, -1) :: INT AS last_reconstruction_year,
+        END :: SMALLINT AS property_floor_number,
+        COALESCE(property_location.property_location_key, -1) :: BIGINT AS property_location_id,
+        COALESCE(property_construction_type.property_construction_type_key, -1) :: BIGINT AS property_construction_type_id,
+        COALESCE(TRY_CAST(REGEXP_EXTRACT(COALESCE(listing_details_idnes.celkova_plocha, listing_details_idnes.uzitna_plocha), '([0-9]+)', 1) AS DECIMAL(10,2)), -1) AS area_total_sqm,
+        COALESCE(LEFT(listing_details_idnes.plocha_pozemku, LENGTH(listing_details_idnes.plocha_pozemku) -3) :: DECIMAL(10,2), -1) AS area_land_sqm,
+        COALESCE(listing_details_idnes.pocet_mistnosti, -1) :: SMALLINT AS number_of_rooms,
+        COALESCE(listing_details_idnes.vystavba_rok, listing_details_idnes.vystavba, listing_details_idnes.kolaudace, -1) :: SMALLINT AS construction_year,
+        COALESCE(listing_details_idnes.rekonstrukce, -1) :: SMALLINT AS last_reconstruction_year,
         COALESCE(LEFT(listing_details_idnes.penb, 1), 'X') AS energy_class_penb,
         COALESCE(listing_details_idnes.stav_budovy, listing_details_idnes.stav_bytu, 'XNA') AS property_condition,
-        COALESCE(property_parking.property_parking_key, -1) :: INT AS property_parking_id,
-        COALESCE(property_heating.property_heating_key, - 1) :: INT AS property_heating_id,
-        COALESCE(property_electricity.property_electricity_key, -1) :: INT AS property_electricity_id,
-        COALESCE(property_accessibility.property_accessibility_key, -1) :: INT AS property_accessibility_id,
-        CASE
-          WHEN listing_details_idnes.balkon = '' THEN 1
-          ELSE 0
-        END AS property_balcony,
-        CASE
-          WHEN listing_details_idnes.lodzie = '' THEN 1
-          ELSE 0
-        END AS property_terrace,
-        CASE
-          WHEN listing_details_idnes.sklep = '' THEN 1
-          ELSE 0
-        END AS property_cellar,
-        CASE
-          WHEN listing_details_idnes.vytah = '' THEN 1
-          ELSE 0
-        END AS property_elevator,
+        COALESCE(property_parking.property_parking_key, -1) :: BIGINT AS property_parking_id,
+        COALESCE(property_heating.property_heating_key, - 1) :: BIGINT AS property_heating_id,
+        COALESCE(property_electricity.property_electricity_key, -1) :: BIGINT AS property_electricity_id,
+        COALESCE(property_accessibility.property_accessibility_key, -1) :: BIGINT AS property_accessibility_id,
+        CASE WHEN listing_details_idnes.balkon = '' THEN 1 ELSE 0 END :: SMALLINT AS property_balcony,
+        CASE WHEN listing_details_idnes.lodzie = '' THEN 1 ELSE 0 END :: SMALLINT AS property_terrace,
+        CASE WHEN listing_details_idnes.sklep = '' THEN 1 ELSE 0 END :: SMALLINT AS property_cellar,
+        CASE WHEN listing_details_idnes.vytah = '' THEN 1 ELSE 0 END :: SMALLINT AS property_elevator,
         CASE
           WHEN COALESCE(listing_details_idnes.odpad, listing_details_idnes.kanalizace) IN ('septik / jímka', 'vlastní čistička') THEN 'jímka'
           WHEN COALESCE(listing_details_idnes.odpad, listing_details_idnes.kanalizace) IN ('veřejná kanalizace', 'septik / jímka, veřejná kanalizace') THEN 'kanalizace' 
           ELSE COALESCE(listing_details_idnes.odpad, listing_details_idnes.kanalizace, 'XNA')
         END AS property_canalization,
-        COALESCE(property_water_supply.property_water_supply_key, -1) :: INT AS property_water_supply_id,
+        COALESCE(property_water_supply.property_water_supply_key, -1) :: BIGINT AS property_water_supply_id,
         'XNA' AS property_air_conditioning,
-        COALESCE(property_gas.property_gas_key, -1) :: INT AS property_gas_id,
-        CASE
-          WHEN listing_details_idnes.internet = '' THEN 1
-          ELSE -1
-        END AS property_internet,
+        COALESCE(property_gas.property_gas_key, -1) :: BIGINT AS property_gas_id,
+        CASE WHEN listing_details_idnes.internet = '' THEN 1 ELSE -1 END :: SMALLINT AS property_internet,
         COALESCE(listing_details_idnes.vybaveni, 'XNA') AS furnishing_level,
         COALESCE(listing_details_idnes.vlastnictvi, 'XNA') AS ownership_type,
         true AS is_active_listing,
+        COALESCE(listing_details_idnes.reserved, False) AS reserved,
         listing_details_idnes.listing_url AS source_url,
         COALESCE(listing_details_idnes.property_description, 'XNA') AS description,
         :cleaner AS src_web,
@@ -74,12 +65,17 @@ USING (
         current_timestamp() AS upd_dt,
         :process_id AS upd_process_id,
         false AS del_flag
-        
+
     FROM realitky.raw.listing_details_idnes
       LEFT JOIN realitky.cleaned.property_type 
         ON UPPER(REPLACE(SPLIT(listing_details_idnes.listing_url, '/')[size(SPLIT(listing_details_idnes.listing_url, '/')) - 4], '-', ' ')) = property_type.type_code_idnes
       LEFT JOIN realitky.cleaned.property_subtype 
-        ON UPPER(listing_details_idnes.property_name) LIKE CONCAT('%', property_subtype.subtype_code_idnes, '%')
+        ON 
+        CASE
+          WHEN UPPER(listing_details_idnes.property_name) LIKE '%SKLEP%' THEN 'SKLEP'
+          WHEN UPPER(listing_details_idnes.property_name) LIKE '%POZEMEK%' THEN 'POZEMEK'
+          ELSE UPPER(listing_details_idnes.property_name) 
+        END = CONCAT('%', property_subtype.subtype_code_idnes, '%')
       LEFT JOIN realitky.cleaned.property_water_supply 
         ON 
           CASE
@@ -177,20 +173,12 @@ AND target.property_name <> source.property_name
  OR target.property_internet <> source.property_internet
  OR target.furnishing_level <> source.furnishing_level
  OR target.ownership_type <> source.ownership_type
+ OR target.reserved <> source.reserved
  OR target.is_active_listing <> source.is_active_listing
  OR target.source_url <> source.source_url
  OR target.description <> source.description
 THEN UPDATE SET
     property_name = source.property_name,
-    address_street = source.address_street,
-    address_house_number = source.address_house_number,
-    ruian_code = source.ruian_code,
-    address_city = source.address_city,
-    address_state = source.address_state,
-    address_postal_code = source.address_postal_code,
-    address_district_code = source.address_district_code,
-    address_latitude = source.address_latitude,
-    address_longitude = source.address_longitude,
     property_type_id = source.property_type_id,
     property_subtype_id = source.property_subtype_id,
     property_number_of_floors = source.property_number_of_floors,
@@ -219,6 +207,7 @@ THEN UPDATE SET
     property_internet = source.property_internet,
     furnishing_level = source.furnishing_level,
     ownership_type = source.ownership_type,
+    reserved = source.reserved,
     is_active_listing = source.is_active_listing,
     source_url = source.source_url,
     description = source.description,
@@ -228,13 +217,17 @@ THEN UPDATE SET
 WHEN NOT MATCHED THEN INSERT (
     property_id,
     property_name,
-    address_street,
-    address_house_number,
-    ruian_code,
-    address_city,
-    address_state,
+    address_country_code,
     address_postal_code,
     address_district_code,
+    address_state,
+    address_city,
+    address_street,
+    address_house_number,
+    address_street_number,
+    address_averaged_flag,
+    ruian_code,
+    ruian_confidence,
     address_latitude,
     address_longitude,
     property_type_id,
@@ -266,6 +259,7 @@ WHEN NOT MATCHED THEN INSERT (
     furnishing_level,
     ownership_type,
     is_active_listing,
+    reserved,
     source_url,
     description,
     src_web,
@@ -277,13 +271,17 @@ WHEN NOT MATCHED THEN INSERT (
 ) VALUES (
     source.property_id,
     source.property_name,
-    source.address_street,
-    source.address_house_number,
-    source.ruian_code,
-    source.address_city,
-    source.address_state,
+    source.address_country_code,
     source.address_postal_code,
     source.address_district_code,
+    source.address_state,
+    source.address_city,
+    source.address_street,
+    source.address_house_number,
+    source.address_street_number,
+    source.address_averaged_flag,
+    source.ruian_code,
+    source.ruian_confidence,
     source.address_latitude,
     source.address_longitude,
     source.property_type_id,
@@ -315,6 +313,7 @@ WHEN NOT MATCHED THEN INSERT (
     source.furnishing_level,
     source.ownership_type,
     source.is_active_listing,
+    source.reserved,
     source.source_url,
     source.description,
     source.src_web,
